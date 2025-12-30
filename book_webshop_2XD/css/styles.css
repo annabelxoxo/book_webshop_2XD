@@ -1,0 +1,482 @@
+/* =========================
+   Global reset + layout
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "urbanist", sans-serif;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  background: #f7f5f2;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* =========================
+   Header + Navigation
+========================= */
+header {
+  background-color: #4a3f35;
+  color: #f8e7d2;
+  padding: 20px 60px;
+  font-family: Arial, sans-serif;
+}
+
+header h1 {
+  margin: 0 0 15px 0;
+  font-size: 30px;
+  text-align: center;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+
+nav li {
+  display: flex;
+  align-items: center;
+}
+
+nav a {
+  color: #f8e7d2;
+  text-decoration: none;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: rgba(248, 231, 210, 0.2);
+}
+
+nav img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* =========================
+   Main content (sticky footer)
+========================= */
+main {
+  flex: 1;               /* <-- duwt footer naar beneden */
+  padding: 40px 8%;
+}
+
+/* =========================
+   Homepage sections
+========================= */
+.intro {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.intro h2 {
+  font-size: 2rem;
+  color: #4a3f35;
+  margin-bottom: 10px;
+}
+
+.intro p {
+  color: #555;
+  max-width: 600px;
+  margin: auto;
+}
+
+.featured-books h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #4a3f35;
+  margin-bottom: 25px;
+}
+
+/* =========================
+   Book cards
+========================= */
+.book-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 30px;
+}
+
+.book-item {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  transition: 0.3s ease-in-out;
+}
+
+.book-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.book-item img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.book-item h3 {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #4a3f35;
+}
+
+.book-item p {
+  margin: 5px 0;
+  color: #555;
+}
+
+/* =========================
+   Forms (login/register)
+========================= */
+main h2 {
+  margin-bottom: 16px;
+  color: #4a3f35;
+}
+
+form {
+  margin-top: 10px;
+  max-width: 420px;
+}
+
+label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #4a3f35;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  max-width: 360px;
+  height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #cfc7bf;
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+}
+
+input:focus {
+  border-color: #4a3f35;
+}
+
+button[type="submit"] {
+  margin-top: 12px;
+  background: #4a3f35;
+  color: #f8e7d2;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button[type="submit"]:hover {
+  opacity: 0.9;
+}
+
+.error {
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ffe3e3;
+  border: 1px solid #ffbcbc;
+  color: #7a1c1c;
+  max-width: 420px;
+}
+
+/* Password toggle (eye icon in input) */
+.password-wrapper {
+  position: relative;
+  max-width: 360px;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 44px;
+}
+
+.password-wrapper button {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.password-wrapper img {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+
+/* =========================
+   Footer
+========================= */
+footer {
+  background-color: #4a3f35;
+  color: #f8e7d2;
+  padding: 40px 60px;
+  font-family: Arial, sans-serif;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
+}
+
+.footer-left p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.footer-left a {
+  color: #f8e7d2;
+  text-decoration: none;
+}
+
+.footer-left a:hover {
+  text-decoration: underline;
+}
+
+.footer-right {
+  max-width: 400px;
+}
+
+.footer-right p {
+  margin-bottom: 15px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.socials {
+  display: flex;
+  gap: 15px;
+}
+
+.socials a {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(248, 231, 210, 0.1);
+  border-radius: 6px;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s ease;
+}
+
+.socials a:hover {
+  background-color: rgba(248, 231, 210, 0.25);
+}
+
+.socials img {
+  width: 18px;
+  height: 18px;
+}
+
+
+/* =========================
+   Fancy auth layout (2-panel)
+========================= */
+.auth-page {
+  padding: 40px 8%;
+}
+
+.auth-layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+  background: #fff;
+  min-height: 520px;
+}
+
+/* Left panel */
+.auth-left {
+  background: #2a0b0b;
+  color: #f8e7d2;
+  padding: 50px 45px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  position: relative;
+}
+
+.auth-left h2 {
+  font-size: 42px;
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+  color: #f2c38b;
+}
+
+.auth-left p {
+  color: rgba(248,231,210,0.85);
+  max-width: 360px;
+}
+
+/* subtle pattern */
+.auth-left::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image: radial-gradient(rgba(242,195,139,0.18) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.35;
+  pointer-events:none;
+}
+
+/* Right panel */
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #f7f5f2;
+  border: 1px solid #f7f5f2;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.auth-card h3 {
+  text-align: center;
+  margin-bottom: 18px;
+  color: #4a3f35;
+  font-size: 22px;
+}
+
+.auth-card label {
+  display: block;
+  margin: 14px 0 6px;
+  font-weight: 600;
+  color: #4a3f35;
+}
+
+.auth-card input[type="email"],
+.auth-card input[type="password"],
+.auth-card input[type="text"] {
+  width: 100%;
+  max-width: 100%;
+  height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #d7cfc7;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+}
+
+.auth-card input:focus {
+  border-color: #4a3f35;
+}
+
+.auth-card .password-wrapper {
+  max-width: 100%;
+}
+
+/* Button */
+.auth-btn {
+  width: 100%;
+  margin-top: 18px;
+  height: 44px;
+  border-radius: 10px;
+  background: #2a0b0b;
+  color: #f8e7d2;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  opacity: 0.92;
+}
+
+.auth-bottom {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.auth-bottom a {
+  color: #2a0b0b;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-bottom a:hover {
+  text-decoration: underline;
+}
+
+/* Error inside card */
+.auth-card .error {
+  max-width: 100%;
+  margin: 0 0 10px;
+}
+
+.success {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e6ffea;
+  border: 1px solid #b9f2c2;
+  color: #1f5b2a;
+}
+
+
+/* Responsive */
+@media (max-width: 900px) {
+  .auth-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-left {
+    padding: 36px 28px;
+    text-align: center;
+  }
+
+  .auth-left h2 {
+    font-size: 34px;
+  }
+}
