@@ -1,9 +1,12 @@
 <?php
 require __DIR__ . "/includes/config.php";
-require __DIR__ . "/includes/auth.php";
+
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
 
 $error = "";
-$email = ""; // <-- belangrijk!
+$email = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -12,21 +15,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($email === '' || $password === '') {
     $error = "Please fill in both fields.";
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $error = "Please enter a valid email address.";
   } else {
 
     $stmt = $pdo->prepare("
-      SELECT id, email, password, role
+      SELECT id, name, email, password, role, units
       FROM user
       WHERE email = ?
+      LIMIT 1
     ");
-
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
 
+      // session values
       $_SESSION['user_id'] = (int)$user['id'];
       $_SESSION['role'] = $user['role'];
+      $_SESSION['name'] = $user['name'];
+      $_SESSION['units'] = (int)$user['units'];
 
       header('Location: index.php');
       exit();
@@ -112,7 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   });
 </script>
-
 
 </body>
 </html>

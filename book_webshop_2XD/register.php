@@ -2,7 +2,7 @@
 require __DIR__ . "/includes/config.php";
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 $error = "";
@@ -18,15 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($name === '' || $email === '' || $password === '' || $password2 === '') {
     $error = "Please fill in all fields.";
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $error = "Please enter a valid email address.";
   } elseif ($password !== $password2) {
     $error = "Passwords do not match.";
   } else {
 
-  if ($email === '' || $password === '' || $password2 === '') {
-    $error = "Please fill in all fields.";
-  } elseif ($password !== $password2) {
-    $error = "Passwords do not match.";
-  } else {
 
     $stmt = $pdo->prepare("SELECT id FROM user WHERE email = ?");
     $stmt->execute([$email]);
@@ -35,17 +32,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($exists) {
       $error = "This email is already registered.";
     } else {
-
       $hash = password_hash($password, PASSWORD_DEFAULT);
 
+
+      $startUnits = 1000;
+
       $stmt = $pdo->prepare("
-        INSERT INTO user (email, password, role)
-        VALUES (?, ?, 'user')
+        INSERT INTO user (name, email, password, role, units)
+        VALUES (?, ?, ?, 'user', ?)
       ");
-      $stmt->execute([$email, $hash]);
+      $stmt->execute([$name, $email, $hash, $startUnits]);
 
-      $success = "Account created! You can now login.";
+      $success = "Account created! You received {$startUnits} units. You can now login.";
+      
 
+      $name = "";
+      $email = "";
     }
   }
 }
@@ -85,6 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="post">
+          <label>Name</label>
+          <input type="text" name="name" value="<?= htmlspecialchars($name) ?>" required>
+
           <label>Email</label>
           <input type="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
 
