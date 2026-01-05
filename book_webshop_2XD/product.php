@@ -85,7 +85,8 @@ $recs = $recStmt->fetchAll();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= htmlspecialchars($book['title']) ?> - Book Webshop</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <base href="/book_webshop_2XD/">
+  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
 </head>
 
 <body>
@@ -107,7 +108,7 @@ $recs = $recStmt->fetchAll();
       <!-- LEFT -->
       <div class="product-media">
 
-        <a class="back-to-catalog" href="catalog.php">← Back to catalog</a>
+        <a class="back-to-catalog" href="book_webshop_2XD/catalog.php">← Back to catalog</a>
 
         <div class="product-cover">
           <img

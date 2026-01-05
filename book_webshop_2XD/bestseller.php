@@ -41,7 +41,8 @@ foreach ($byGenre as $g => $list) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bestsellers - Book Webshop</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <base href="/book_webshop_2XD/">
+  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
 </head>
 
 <body>
@@ -73,7 +74,7 @@ foreach ($byGenre as $g => $list) {
             <article class="bestseller-item">
               <div class="bestseller-rank"><?= $rank++ ?></div>
 
-              <a class="bestseller-cover" href="product.php?id=<?= (int)$book['id'] ?>">
+              <a class="bestseller-cover" href="book_webshop_2XD/product.php?id=<?= (int)$book['id'] ?>">
                 <img
                   src="<?= htmlspecialchars($book['cover_image']) ?>"
                   alt="<?= htmlspecialchars($book['title']) ?>"

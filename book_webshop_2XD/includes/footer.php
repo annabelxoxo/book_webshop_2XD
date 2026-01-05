@@ -20,13 +20,13 @@
 
       <div class="socials">
         <a href="https://facebook.com/uitsprakenannabel.smeulders" target="_blank">
-          <img src="images/facebook.png" alt="Facebook">
+          <img src="book_webshop_2XD/images/facebook.png" alt="Facebook">
         </a>
         <a href="https://www.instagram.com/smeuldersannabel/" target="_blank">
-          <img src="images/instagram.png" alt="Instagram">
+          <img src="book_webshop_2XD/images/instagram.png" alt="Instagram">
         </a>
         <a href="https://www.tiktok.com/@annabel_happycow" target="_blank">
-          <img src="images/tiktok.png" alt="TikTok">
+          <img src="book_webshop_2XD/images/tiktok.png" alt="TikTok">
         </a>
       </div>
     </div>

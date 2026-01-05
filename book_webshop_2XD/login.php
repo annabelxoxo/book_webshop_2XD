@@ -51,7 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Book Webshop</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <base href="/book_webshop_2XD/">
+  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
 </head>
 
 <body>
@@ -83,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" id="password" name="password" required>
 
             <button type="button" id="togglePassword" aria-label="Show password">
-              <img id="eyeIcon" src="images/hide.png" alt="Show password">
+              <img id="eyeIcon" src="book_webshop_2XD/images/hide.png" alt="Show password">
             </button>
           </div>
 
@@ -91,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <p class="auth-bottom">
-          Don't have an account? <a href="register.php">Register here</a>.
+          Don't have an account? <a href="book_webshop_2XD/register.php">Register here</a>.
         </p>
       </div>
     </div>
@@ -109,12 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   toggleBtn.addEventListener("click", function () {
     if (passwordInput.type === "password") {
       passwordInput.type = "text";
-      eyeIcon.src = "images/visible.png";
+      eyeIcon.src = "book_webshop_2XD/images/visible.png";
       eyeIcon.alt = "Hide password";
       toggleBtn.setAttribute("aria-label", "Hide password");
     } else {
       passwordInput.type = "password";
-      eyeIcon.src = "images/hide.png";
+      eyeIcon.src = "book_webshop_2XD/images/hide.png";
       eyeIcon.alt = "Show password";
       toggleBtn.setAttribute("aria-label", "Show password");
     }

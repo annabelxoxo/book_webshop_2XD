@@ -59,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - Book Webshop</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <base href="/book_webshop_2XD/">
+  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
 </head>
 
 <body>
@@ -97,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="password-wrapper">
             <input type="password" id="password" name="password" required>
             <button type="button" id="togglePassword" aria-label="Show password">
-              <img id="eyeIcon" src="images/hide.png" alt="Show password">
+              <img id="eyeIcon" src="book_webshop_2XD/images/hide.png" alt="Show password">
             </button>
           </div>
 
@@ -105,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="password-wrapper">
             <input type="password" id="password2" name="password2" required>
             <button type="button" id="togglePassword2" aria-label="Show password">
-              <img id="eyeIcon2" src="images/hide.png" alt="Show password">
+              <img id="eyeIcon2" src="book_webshop_2XD/images/hide.png" alt="Show password">
             </button>
           </div>
 
@@ -113,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <p class="auth-bottom">
-          Already have an account? <a href="login.php">Login here</a>.
+          Already have an account? <a href="book_webshop_2XD/login.php">Login here</a>.
         </p>
       </div>
     </div>
@@ -131,11 +132,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   btn1.addEventListener("click", function () {
     if (pw1.type === "password") {
       pw1.type = "text";
-      icon1.src = "images/visible.png";
+      icon1.src = "book_webshop_2XD/images/visible.png";
       btn1.setAttribute("aria-label", "Hide password");
     } else {
       pw1.type = "password";
-      icon1.src = "images/hide.png";
+      icon1.src = "book_webshop_2XD/images/hide.png";
       btn1.setAttribute("aria-label", "Show password");
     }
   });
@@ -147,11 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   btn2.addEventListener("click", function () {
     if (pw2.type === "password") {
       pw2.type = "text";
-      icon2.src = "images/visible.png";
+      icon2.src = "book_webshop_2XD/images/visible.png";
       btn2.setAttribute("aria-label", "Hide password");
     } else {
       pw2.type = "password";
-      icon2.src = "images/hide.png";
+      icon2.src = "book_webshop_2XD/images/hide.png";
       btn2.setAttribute("aria-label", "Show password");
     }
   });

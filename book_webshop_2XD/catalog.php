@@ -45,7 +45,8 @@ $genres = $genresStmt->fetchAll();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catalog - Book Webshop</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <base href="/book_webshop_2XD/">
+  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
 </head>
 
 <body>
@@ -76,7 +77,7 @@ $genres = $genresStmt->fetchAll();
 
         <div class="control control-btns">
           <button type="submit" class="btn-primary">Apply</button>
-          <a class="btn-secondary" href="catalog.php">Reset</a>
+          <a class="btn-secondary" href="book_webshop_2XD/catalog.php">Reset</a>
         </div>
       </form>
 
@@ -95,7 +96,7 @@ $genres = $genresStmt->fetchAll();
         <?php $units = (int) round(((float)$book['price']) * 10); ?>
 
         <article class="catalog-card">
-          <a href="product.php?id=<?= (int)$book['id'] ?>" class="catalog-card-link">
+          <a href="book_webshop_2XD/product.php?id=<?= (int)$book['id'] ?>" class="catalog-card-link">
             <div class="catalog-img">
               <img
                 src="<?= htmlspecialchars($book['cover_image']) ?>"
