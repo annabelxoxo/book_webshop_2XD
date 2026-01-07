@@ -156,7 +156,7 @@ foreach ($books as $b) {
               $lineUnits = $unitsEach * $qty;
             ?>
             <article class="cart-card">
-              <a class="cart-card-link" href="product.php?id=<?= $id ?>">
+              <a class="cart-card-link" href="book_webshop_2XD/product.php?id=<?= $id ?>">
                 <div class="cart-img">
                   <img src="<?= htmlspecialchars($b['cover_image']) ?>" alt="<?= htmlspecialchars($b['title']) ?>">
                 </div>

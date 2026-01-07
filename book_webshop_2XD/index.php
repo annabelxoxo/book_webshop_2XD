@@ -44,7 +44,7 @@ $books = $stmt->fetchAll();
           $units = (int) round(((float)$book['price']) * 10);
 
           echo "
-          <a class='book-item' href='product.php?id=".(int)$book['id']."'>
+          <a class='book-item' href='book_webshop_2XD/product.php?id=".(int)$book['id']."'>
             <img src='".htmlspecialchars($book['cover_image'])."' alt='".htmlspecialchars($book['title'])."'>
             <h3>".htmlspecialchars(ucwords($book['title']))."</h3>
             <p>by ".htmlspecialchars($book['author'])."</p>

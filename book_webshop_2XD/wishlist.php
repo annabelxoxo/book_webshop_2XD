@@ -130,7 +130,7 @@ if (!empty($wishlistIds)) {
         <?php foreach ($books as $b): ?>
           <?php $units = (int)round(((float)$b['price']) * 10); ?>
           <article class="wishlist-card">
-            <a class="wishlist-link" href="product.php?id=<?= (int)$b['id'] ?>">
+            <a class="wishlist-link" href="book_webshop_2XD/product.php?id=<?= (int)$b['id'] ?>">
               <div class="wishlist-img">
                 <img src="<?= htmlspecialchars($b['cover_image']) ?>" alt="<?= htmlspecialchars($b['title']) ?>">
               </div>
