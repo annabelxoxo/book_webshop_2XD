@@ -5,79 +5,78 @@ if(session_status() === PHP_SESSION_NONE){
     session_start();
 }
 
-if(!isset($_SESSION['wishlist'])) {
-    $_SESSION['wishlist'] = [];
+
+if (!isset($_SESSION["user_id"])) {
+  header("Location: /book_webshop_2XD/login.php");
+  exit;
 }
-if (!isset($_SESSION['cart'])) {
-  $_SESSION['cart'] = [];
-}
+$userId = (int)$_SESSION["user_id"];
 
 $success = "";
 $error = "";
 
-if($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $action = $_POST["action"] ?? "";
+  $id = (int)($_POST["id"] ?? 0);
 
-    if($action === 'remove') {
-        $removeId =(int)($_POST['id'] ?? 0);
-        $_SESSION['wishlist'] = array_values(array_filter(
-            $_SESSION['wishlist'],
-            fn($x) => (int)$x !== $removeId 
-        ));
-        $success = "Book removed from wishlist.";
+  try {
+    if ($action === "remove" && $id > 0) {
+      $stmt = $pdo->prepare("DELETE FROM wishlist WHERE user_id = ? AND book_id = ? LIMIT 1");
+      $stmt->execute([$userId, $id]);
+      $success = "Book removed from wishlist.";
     }
-    
-if ($action === 'clear') {
-    $_SESSION['wishlist'] = [];
-    $success = "Wishlist cleared.";
-  }
 
-if ($action === 'move_to_cart') {
-  $id = (int)($_POST['id'] ?? 0);
+    if ($action === "clear") {
+      $stmt = $pdo->prepare("DELETE FROM wishlist WHERE user_id = ?");
+      $stmt->execute([$userId]);
+      $success = "Wishlist cleared.";
+    }
 
-  if ($id > 0 && in_array($id, $_SESSION['wishlist'], true)) {
+    if ($action === "move_to_cart" && $id > 0) {
+      $pdo->beginTransaction();
 
+      $del = $pdo->prepare("DELETE FROM wishlist WHERE user_id = ? AND book_id = ? LIMIT 1");
+      $del->execute([$userId, $id]);
 
-       $_SESSION['wishlist'] = array_values(array_filter(
-        $_SESSION['wishlist'],
-        fn($x) => (int)$x !== $id
-      ));
+      $ins = $pdo->prepare("
+        INSERT INTO cart (user_id, book_id, quantity, added_at)
+        VALUES (?, ?, 1, NOW())
+        ON DUPLICATE KEY UPDATE quantity = quantity + 1
+      ");
+      $ins->execute([$userId, $id]);
 
-      if (!isset($_SESSION['cart'][$id])) {
-        $_SESSION['cart'][$id] = 1;
-      } else {
-        $_SESSION['cart'][$id] += 1;
-      }
-
+      $pdo->commit();
       $success = "Moved to cart.";
-  }
-}
-}
-
-$wishlistIds = array_map('intval', $_SESSION['wishlist']);
-$books = [];
-
-if (!empty($wishlistIds)) {
-    $placeholders = implode(',', array_fill(0, count($wishlistIds), '?'));
-    $stmt = $pdo->prepare("
-    SELECT b.id, b.title, b.price, b.cover_image, a.name AS author_name
-    FROM book b
-    JOIN author a ON b.author_id = a.id
-    WHERE b.id IN ($placeholders)
-    ");
-    $stmt->execute($wishlistIds);
-    $rows = $stmt->fetchAll();
-
-  $byId = [];
-  foreach ($rows as $r) $byId[(int)$r['id']] = $r;
-
-  foreach ($wishlistIds as $wid) {
-    if (isset($byId[$wid])) $books[] = $byId[$wid];
     }
+
+  } catch (Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    $error = "Something went wrong: " . $e->getMessage();
   }
+}
 
+$books = [];
+try {
+  $stmt = $pdo->prepare("
+    SELECT
+      b.id,
+      b.title,
+      b.price,
+      b.cover_image,
+      a.name AS author_name
+    FROM wishlist w
+    JOIN book b ON b.id = w.book_id
+    JOIN author a ON a.id = b.author_id
+    WHERE w.user_id = ?
+    ORDER BY w.added_at DESC, b.id DESC
+  ");
+  $stmt->execute([$userId]);
+  $books = $stmt->fetchAll();
+} catch (Throwable $e) {
+  $error = "Could not load wishlist: " . $e->getMessage();
+}
 
-
+$wishlistIds = array_map(fn($r) => (int)$r["id"], $books);
 ?>
 
 

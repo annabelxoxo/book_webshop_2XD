@@ -8,6 +8,12 @@ if (session_status() === PHP_SESSION_NONE) {
 $error = "";
 $email = "";
 
+$redirect = trim((string)($_GET['redirect'] ?? 'book_webshop_2XD/index.php'));
+
+if ($redirect === '' || str_contains($redirect, '://') || str_starts_with($redirect, '//')) {
+  $redirect = 'book_webshop_2XD/index.php';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   $email = trim($_POST['email'] ?? '');
@@ -30,14 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($user && password_verify($password, $user['password'])) {
 
-      // session values
       $_SESSION['user_id'] = (int)$user['id'];
       $_SESSION['role'] = $user['role'];
       $_SESSION['name'] = $user['name'];
       $_SESSION['units'] = (int)$user['units'];
 
-      header('Location: index.php');
-      exit();
+header("Location: /book_webshop_2XD/" . ltrim($redirect, "/"));
+exit;
     } else {
       $error = "Invalid email or password.";
     }
@@ -75,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <p class="error"><?= htmlspecialchars($error); ?></p>
         <?php endif; ?>
 
-        <form method="post">
+          <form method="post" action="book_webshop_2XD/login.php?redirect=<?= urlencode($redirect) ?>">
           <label>Email</label>
           <input type="email" name="email" value="<?= htmlspecialchars($email) ?>" required>
 

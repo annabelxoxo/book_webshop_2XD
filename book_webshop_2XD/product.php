@@ -36,33 +36,51 @@ if (!$book) {
 $units = (int)round(((float)$book['price']) * 10);
 
 
-if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-if (!isset($_SESSION['wishlist'])) $_SESSION['wishlist'] = [];
-
 $success = "";
 $error = "";
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+  if (!isset($_SESSION["user_id"])) {
+    header("Location: /book_webshop_2XD/login.php");
+    exit;
+  }
+
+  $userId = (int)$_SESSION["user_id"];
   $action = $_POST['action'] ?? '';
 
+  try {
   if ($action === 'add_to_cart') {
     $qty = (int)($_POST['qty'] ?? 1);
     if ($qty < 1) $qty = 1;
 
-    if (!isset($_SESSION['cart'][$id])) $_SESSION['cart'][$id] = 0;
-    $_SESSION['cart'][$id] += $qty;
+    $stmt = $pdo->prepare("
+      INSERT INTO cart (user_id, book_id, quantity) 
+      VALUES (?, ?, ?) 
+      ON DUPLICATE KEY UPDATE quantity = quantity + ?
+    ");
+    $stmt->execute([$userId, $id, $qty, $qty]);
 
     $success = "Added to cart!";
   }
 
   if ($action === 'add_to_wishlist') {
-    if (!in_array($id, $_SESSION['wishlist'], true)) {
-      $_SESSION['wishlist'][] = $id;
+
+    $stmt = $pdo->prepare("
+    INSERT INTO wishlist (user_id, book_id, added_at)
+    VALUES (?, ?, NOW())
+    ON DUPLICATE KEY UPDATE added_at = NOW()
+    ");
+    $stmt->execute([$userId, $id]);
+ 
       $success = "Added to wishlist!";
-    } else {
+  
       $success = "This book is already in your wishlist.";
     }
+
+  } catch (Throwable $e) {
+    $error = "Something went wrong: " . $e->getMessage();
   }
 }
 
@@ -174,7 +192,7 @@ $recs = $recStmt->fetchAll();
         <?php foreach ($recs as $r): ?>
           <?php $rUnits = (int)round(((float)$r['price']) * 10); ?>
           <article class="rec-card">
-            <a href="product.php?id=<?= (int)$r['id'] ?>" class="rec-link">
+            <a href="book_webshop_2XD/product.php?id=<?= (int)$r['id'] ?>" class="rec-link">
               <div class="rec-img">
                 <img src="<?= htmlspecialchars($r['cover_image']) ?>" alt="<?= htmlspecialchars($r['title']) ?>">
               </div>

@@ -15,6 +15,8 @@ $userId = (int)$_SESSION['user_id'];
 $success = "";
 $error = "";
 
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
 $stmt = $pdo->prepare("SELECT id, name, email FROM user WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch();
@@ -56,6 +58,32 @@ $addrStmt = $pdo->prepare("
 ");
 $addrStmt->execute([$userId]);
 $addresses = $addrStmt->fetchAll();
+
+$wishlistCount = 0;
+try {
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM wishlist WHERE user_id = ?");
+  $stmt->execute([$userId]);
+  $wishlistCount = (int)($stmt->fetchColumn() ?? 0);
+} catch (Throwable $e) {
+  $wishlistCount = 0;
+}
+
+$cartItemsCount = 0;
+$cartQtyTotal = 0;
+
+try {
+  $stmt = $pdo->prepare("SELECT COUNT(*) FROM cart WHERE user_id = ?");
+  $stmt->execute([$userId]);
+  $cartItemsCount = (int)($stmt->fetchColumn() ?? 0);
+
+  $stmt = $pdo->prepare("SELECT COALESCE(SUM(quantity),0) FROM cart WHERE user_id = ?");
+  $stmt->execute([$userId]);
+  $cartQtyTotal = (int)($stmt->fetchColumn() ?? 0);
+} catch (Throwable $e) {
+  $cartItemsCount = 0;
+  $cartQtyTotal = 0;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -79,7 +107,7 @@ $addresses = $addrStmt->fetchAll();
             <nav class="profile-menu">
             <a href="book_webshop_2XD/profile.php">Profile Info</a>
             <a href="book_webshop_2XD/wishlist.php">Wishlist</a>
-            <a href="book_webshop_2XD/cart.php">Shopping Cart</a>
+            <a href="book_webshop_2XD/classes/cart.php">Shopping Cart</a>
             <a href="book_webshop_2XD/orders.php">Order History</a>
 
             <form method="post" action="book_webshop_2XD/logout.php">
@@ -114,7 +142,24 @@ $addresses = $addrStmt->fetchAll();
 
     <a href="#" class="profile-edit">Edit Profile</a>
     </div>
+      <div class="profile-box">
+        <h2>My shopping</h2>
 
+        <div class="profile-row">
+          <span>Wishlist</span>
+          <strong><?= (int)$wishlistCount ?> item(s)</strong>
+        </div>
+
+        <div class="profile-row">
+          <span>Cart</span>
+          <strong><?= (int)$cartQtyTotal ?> item(s)</strong>
+        </div>
+
+        <div>
+          <a class="btn-secondary" href="book_webshop_2XD/wishlist.php">Open wishlist</a>
+          <a class="btn-secondary" href="book_webshop_2XD/classes/cart.php">Open cart</a>
+        </div>
+      </div>
     <div class="profile-box">
         <h2>change password</h2>
         <p>

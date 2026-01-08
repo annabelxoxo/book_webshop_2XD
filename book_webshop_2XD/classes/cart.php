@@ -4,13 +4,12 @@ require __DIR__ . "/../includes/config.php";
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
+if(!isset($_SESSION["user_id"])){
+    header("Location: /book_webshop_2XD/login.php");
+    exit;
+}
+$userId = (int)$_SESSION["user_id"];
 
-if (!isset($_SESSION['cart'])) {
-  $_SESSION['cart'] = []; 
-}
-if (!isset($_SESSION['wishlist'])) {
-  $_SESSION['wishlist'] = []; 
-}
 
 $success = "";
 $error = "";
@@ -18,84 +17,91 @@ $error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $action = $_POST['action'] ?? '';
+  $id = (int)($_POST['id'] ?? 0);
 
-  if ($action === 'remove') {
-    $id = (int)($_POST['id'] ?? 0);
-    if ($id > 0) {
-      unset($_SESSION['cart'][$id]);
-      $success = "Book removed from cart.";
-    }
+try {
+
+  if ($action === 'remove' && $id > 0) {
+    $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
+    $stmt->execute([$userId, $id]);
+    $success = "Book removed from cart.";
   }
 
   if ($action === 'clear') {
-    $_SESSION['cart'] = [];
+    $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ?");
+    $stmt->execute([$userId]);
     $success = "Cart cleared.";
   }
 
-  if ($action === 'update_qty') {
-    $id = (int)($_POST['id'] ?? 0);
+  if ($action === 'update_qty' && $id > 0) {
     $qty = (int)($_POST['qty'] ?? 1);
     if ($qty < 1) $qty = 1;
 
-    if ($id > 0 && isset($_SESSION['cart'][$id])) {
-      $_SESSION['cart'][$id] = $qty;
-      $success = "Quantity updated.";
-    }
+    
+  $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE user_id = ? AND book_id = ? LIMIT 1");
+    $stmt->execute([$qty, $userId, $id]);
+    $success = "Quantity updated.";
   }
 
+  if ($action === 'move_to_wishlist' && $id > 0) {
+    $pdo->beginTransaction();
+    $del = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
+    $del->execute([$userId, $id]);
 
-  if ($action === 'move_to_wishlist') {
-    $id = (int)($_POST['id'] ?? 0);
-    if ($id > 0 && isset($_SESSION['cart'][$id])) {
-      unset($_SESSION['cart'][$id]);
+    $ins = $pdo->prepare("
+      INSERT INTO wishlist (user_id, book_id, added_at)
+      VALUES (?, ?, NOW())
+      ON DUPLICATE KEY UPDATE added_at = NOW()
+    ");
 
-      if (!in_array($id, $_SESSION['wishlist'], true)) {
-        $_SESSION['wishlist'][] = $id;
-      }
+    $ins->execute([$userId, $id]);
+
+    $pdo->commit();
       $success = "Moved to wishlist.";
     }
+
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    $error = "Something went wrong: " . $e->getMessage();
+  
   }
 }
 
-
-$cart = $_SESSION['cart'];               
-$cartIds = array_keys($cart);
-$books = [];
-
-if (!empty($cartIds)) {
-  $placeholders = implode(',', array_fill(0, count($cartIds), '?'));
-
+$items = [];
+try {
   $stmt = $pdo->prepare("
-    SELECT b.id, b.title, b.price, b.cover_image, a.name AS author_name
-    FROM book b
+    SELECT c.book_id AS id,
+    c.quantity,
+    b.title,
+    b.price,
+    b.cover_image,
+    a.name AS author_name
+    FROM cart c
+    JOIN book b ON b.id = c.book_id
     JOIN author a ON a.id = b.author_id
-    WHERE b.id IN ($placeholders)
-  ");
-  $stmt->execute($cartIds);
-  $rows = $stmt->fetchAll();
-
-  $byId = [];
-  foreach ($rows as $r) $byId[(int)$r['id']] = $r;
-
-
-  foreach ($cartIds as $id) {
-    if (isset($byId[$id])) $books[] = $byId[$id];
-  }
+    WHERE c.user_id = ?
+    ORDER BY c.added_at DESC, c.book_id DESC");
+  $stmt->execute([$userId]);
+  $items = $stmt->fetchAll();
+} catch (Throwable $e) {
+  $error = "Could not load cart items: " . $e->getMessage();
 }
 
 
 $totalEuro = 0.0;
 $totalUnits = 0;
+$totalQty = 0;
 
-foreach ($books as $b) {
-  $id = (int)$b['id'];
-  $qty = (int)($cart[$id] ?? 1);
 
-  $lineEuro = ((float)$b['price']) * $qty;
-  $lineUnits = (int)round(((float)$b['price']) * 10) * $qty;
+foreach ($items as $it) {
 
-  $totalEuro += $lineEuro;
-  $totalUnits += $lineUnits;
+  $qty = (int)$it['quantity'];
+  $price = (float)$it['price'];
+
+  $totalQty += $qty;
+  $totalEuro += $price * $qty;
+  $totalUnits += (int)round($price * 10) * $qty;
+
 }
 ?>
 <!DOCTYPE html>
@@ -120,7 +126,7 @@ foreach ($books as $b) {
         <p class="cart-sub">Review your items before checkout.</p>
       </div>
 
-      <?php if (!empty($_SESSION['cart'])): ?>
+      <?php if (!empty($items)): ?>
         <form method="post">
           <input type="hidden" name="action" value="clear">
           <button type="submit" class="btn-secondary">Clear cart</button>
@@ -136,7 +142,7 @@ foreach ($books as $b) {
       <p class="success"><?= htmlspecialchars($success) ?></p>
     <?php endif; ?>
 
-    <?php if (empty($books)): ?>
+    <?php if (empty($items)): ?>
       <div class="cart-empty">
         <p>Your cart is empty.</p>
         <a class="btn-primary" href="book_webshop_2XD/catalog.php">Browse catalog</a>
@@ -146,12 +152,12 @@ foreach ($books as $b) {
       <div class="cart-layout">
 
         <section class="cart-items">
-          <?php foreach ($books as $b): ?>
+          <?php foreach ($items as $b): ?>
             <?php
               $id = (int)$b['id'];
-              $qty = (int)($cart[$id] ?? 1);
-              $unitsEach = (int)round(((float)$b['price']) * 10);
+              $qty = (int)$b['quantity'];
 
+              $unitsEach = (int)round(((float)$b['price']) * 10);
               $lineEuro = ((float)$b['price']) * $qty;
               $lineUnits = $unitsEach * $qty;
             ?>
@@ -211,7 +217,7 @@ foreach ($books as $b) {
 
           <div class="cart-summary-row">
             <span>Items</span>
-            <strong><?= array_sum(array_map('intval', $_SESSION['cart'])) ?></strong>
+            <strong><?= (int)$totalQty ?></strong>
           </div>
 
           <div class="cart-summary-row">
