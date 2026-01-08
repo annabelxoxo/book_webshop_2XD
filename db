@@ -1,0 +1,831 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Gegenereerd op: 08 jan 2026 om 12:49
+-- Serverversie: 10.4.32-MariaDB
+-- PHP-versie: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `online_book_webshop_dat`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `address`
+--
+
+CREATE TABLE `address` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `type` enum('billing','shipping') NOT NULL DEFAULT 'shipping',
+  `full_name` varchar(150) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `street` varchar(150) NOT NULL,
+  `house_number` varchar(20) NOT NULL,
+  `house_number_addition` varchar(20) DEFAULT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `country_code` char(2) NOT NULL DEFAULT 'NL',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `address`
+--
+
+INSERT INTO `address` (`id`, `user_id`, `type`, `full_name`, `phone`, `street`, `house_number`, `house_number_addition`, `postal_code`, `city`, `region`, `country_code`, `created_at`, `updated_at`) VALUES
+(1, 1, 'shipping', 'Annabel Smeulders', '0483450862', 'Kleine Molenweg', '78', '78', '2940', 'Stabroek', 'Antwerpen', 'BE', '2026-01-06 19:13:14', '2026-01-06 20:34:29'),
+(3, 4, 'shipping', 'Annabel Smeulders', '0483450862', 'Kleine Molenweg', '78', '78', '2800', 'mechelen', '', 'BE', '2026-01-08 22:56:47', '2026-01-08 22:56:47');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `author`
+--
+
+CREATE TABLE `author` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `author`
+--
+
+INSERT INTO `author` (`id`, `name`) VALUES
+(1, 'Callie Hart'),
+(2, 'Carissa Broadbent'),
+(3, 'Colleen Hoover'),
+(4, 'Dustin Thao'),
+(5, 'Iain S. Thomas'),
+(6, 'L.J. Smith'),
+(7, 'Rebecca Yarros'),
+(8, 'Rupi Kaur'),
+(9, 'Sarah J. Maas'),
+(10, 'Travis Baldree'),
+(11, 'Elsie Silver'),
+(12, 'Lauren Roberts'),
+(13, 'Leigh Bardugo'),
+(14, 'Victoria Aveyard'),
+(15, 'Holly Black');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `book`
+--
+
+CREATE TABLE `book` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(6,2) NOT NULL,
+  `cover_image` varchar(255) NOT NULL,
+  `release_date` date DEFAULT NULL,
+  `author_id` int(11) DEFAULT NULL,
+  `isbn` varchar(20) DEFAULT NULL,
+  `serie_id` int(11) DEFAULT NULL,
+  `serie_number` int(11) DEFAULT NULL,
+  `serie` varchar(100) DEFAULT NULL,
+  `serie_nummer` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `book`
+--
+
+INSERT INTO `book` (`id`, `title`, `description`, `price`, `cover_image`, `release_date`, `author_id`, `isbn`, `serie_id`, `serie_number`, `serie`, `serie_nummer`) VALUES
+(1, 'the sun and her flowers', 'A vibrant and transcendent journey about growth and healing. Ancestry and honoring one’s roots. Expatriation and rising up to find a home within yourself.\n\nthis is the recipe of life\nsaid my mother\nas she held me in her arms as i wept\nthink of those flowers you plant\nin the garden each year\nthey will teach you\nthat people too\nmust wilt\nfall\nroot\nrise\nin order to bloom', 11.39, 'images/the sun and her flower.jpg', '2017-10-03', 8, NULL, NULL, NULL, NULL, NULL),
+(2, '2am thoughts', 'I met you at dusk.\nWe loved till midnight.\nThen, you left me.\n2am found me at my lowest.\nWhen the sun came up, I dried my tears,\nfound my strength,\nand went on with my day.\nThe poetry of 2am Thoughts condenses an entire relationship with its untamed emotions and experiences to a single day. As the long hours of the night drag on, so does the love, heartache, and loss. When the dawn breaks, the morning sun brings acceptance, healing, and recovery.', 15.96, 'images/2 am thoughts.jpg', '2019-04-02', 8, NULL, NULL, NULL, NULL, NULL),
+(3, 'a court of mist and fury', 'Surrender your heart in a world of temptation and danger ... The steamy second book in the seductive fantasy series from global #1 bestselling author Sarah J. Maas for fans of E.L. James and Deborah Harkness', 7.32, 'images/a court of mist and fury.jpg', '2016-05-03', 9, NULL, NULL, NULL, NULL, NULL),
+(4, 'every word you cannot say', '*May this book find the person it needs to. May they find every word they were looking for.*\n**I know you don\'t want to talk sometimes. Sometimes because it hurts and sometimes because you\'re just not supposed to talk about what you want to talk about. Sometimes it can be hard to say, \"this is beautiful,\" when no one else can see what you see. Or, \"Here, this is where the pain is.\"\nBut some part of you knows, the truth about the words you cannot say is that they only hurt until you say them. They only hurt until the person who needs to hear them, hears them. Because we are human, and the closest we\'ve ever come to showing each other who we really are, and how we love, is with words.\nSo I\'m going to try to say to you here, what I wish you\'d say to me too. Please.\nListen. We can change things.\nHere.', 11.39, 'images/every word you cannot say.jpg', '2017-06-27', 5, NULL, NULL, NULL, NULL, NULL),
+(5, 'fourth wing', 'Her dream of becoming a scribe at the renowned Basgiath War College is shattered when the general—who also happens to be her mother—orders her to take part in the selection process for the Dragon Riders. Half of the cadets will not survive the first year, and most want Violet out of the way because of her lineage—especially Xaden, the ruthless leader of the squadron. Violet must do everything she can to survive, because at Basgiath there are only two options: graduate or die.', 12.31, 'images/fourth wing.jpg', '2023-05-02', 7, NULL, NULL, NULL, NULL, NULL),
+(6, 'it ends with us', 'Lily falls in love with the handsome neurosurgeon Ryle. He is assertive, stubborn, and a bit arrogant, but also sensitive, brilliant, and devoted to Lily. As their new relationship blossoms, memories of Atlas—her first love—resurface. When he reappears in her life, everything Lily has built is put at risk. She must then find the strength within herself to make sure the future does not become a repetition of the past.', 9.99, 'images/it ends with us.jpg', '2016-08-02', 3, NULL, NULL, NULL, NULL, NULL),
+(7, 'legends & lattes', 'After decades of adventuring, Viv the orc barbarian is finally hanging up her sword for good. Now she sets her sights on a new dream – for she plans to open the first coffee shop in the city of Thune. Even though no one there knows what coffee actually is. If Viv wants to put the past behind her, she can’t go it alone. And help might arrive from unexpected quarters. Yet old rivals and new stand in the way of success. And Thune’s shady underbelly could make it all too easy for Viv to take up the blade once more. But the true reward of the uncharted path is the travellers you meet along the way. Whether bound by ancient magic, delicious pastries or a freshly brewed cup, they may become something deeper than Viv ever could have imagined . . . ‘The most fun I\'ve ever had in a coffee shop’ – Ben Aaronovitch, bestselling author of Rivers of London\'A must-read for every D&D player who has ever wondered what happens after \'happily ever after\' - Cassandra Khaw, award-winning author of Nothing but Blackened Teeth.', 8.07, 'images/legends & latte.jpeg', '2022-02-22', 10, NULL, NULL, NULL, NULL, NULL),
+(8, 'milk and honey', 'The book is divided into four chapters, and each chapter serves a different purpose. Deals with a different pain. Heals a different heartache. milk and honey takes readers through a journey of the most bitter moments in life and finds sweetness in them because there is sweetness everywhere if you are just willing to look.', 15.96, 'images/milk and honey.jpg', '2014-11-04', 8, NULL, NULL, NULL, NULL, NULL),
+(9, 'quicksilver', 'In an attempt to escape her death sentence imposed by the Immortal Queen Madra, Saeris accidentally opens a portal between her realm and the mythical world of the Fae. She is rescued by Kingfisher, a handsome, mysterious, but moody Fae warrior. Without realizing it, she enters into a pact with him: under Kingfisher’s guidance, she must learn to use her newly discovered alchemist magic to protect his people in the approaching war against the vampires. Only after she has completed this task will she be allowed to return to her own realm.\n\nDespite the fact that she can’t stand him, the attraction between Saeris and Kingfisher is undeniable. However, Kingfisher carries a dark secret about his own past, which causes him to keep her at a distance. Slowly but surely, Saeris begins to unravel the secrets surrounding her own magic, Kingfisher, and the world of the Fae, and she realizes that her fate is more closely tied to the Fae warrior than she might like. Together, they must work to protect both Kingfisher’s realm and her own from the trinity of human, Fae, and vampire—an all-consuming force.', 18.39, 'images/quicksilver.jpg', '2023-06-20', 1, NULL, NULL, NULL, NULL, NULL),
+(10, 'the Serpent and the wings of night', 'The Serpent and the Wings of Night is The Hunger Games with vampires and the first book in the Sunday Times bestselling Crowns of Nyaxia series by Carissa Broadbent. Perfect for fans of From Blood and Ash and A Court of Thorns and Roses.', 24.99, 'images/the serpent and the wings of night.jpeg', '2022-08-30', 2, NULL, NULL, NULL, NULL, NULL),
+(11, 'Vampire Diaries: the awakening', 'Elena Gilbert is used to getting what she wants and she wants mysterious new boy, Stefan. But Stefan is hiding a deadly secret - a secret that will change Elena\'s life for ever...', 15.99, 'images/vampire diaries.jpg', '1991-03-01', 6, NULL, NULL, NULL, NULL, NULL),
+(12, 'you\'ve reached Sam', 'What would you do if you had a second chance at goodbye?\r\n\r\nSeventeen-year-old Julie has her future all planned out: move out of her small town with her boyfriend Sam, attend college in the city, spend a summer in Japan. But then Sam dies. And everything changes.\r\n\r\nDesperate to hear his voice one more time, Julie calls Sam’s phone just to listen to his voicemail. And Sam picks up the phone . . .', 10.99, 'images/you\'ve reached sam.jpeg', '2021-11-09', 4, NULL, NULL, NULL, NULL, NULL),
+(13, 'flawless', 'Enter your cowboy era with this must-read, small-town romance from Sunday Times bestselling author!', 13.99, 'images/flawless.jpg', '2022-06-24', 11, NULL, NULL, NULL, 'Chestnut Springs', 1),
+(14, 'heartless', 'The perfect small-town, single dad romance from the Sunday Times bestselling author of Wild Love !', 14.49, 'images/heartless.jpg', '2022-09-09', 11, NULL, NULL, NULL, 'Chestnut Springs', 2),
+(15, 'powerless', 'A sweet and steamy small-town romance from the Sunday Times bestselling author of Wild Love!', 14.99, 'images/powerless_elsie.jpg', '2023-01-06', 11, NULL, NULL, NULL, 'Chestnut Springs', 3),
+(16, 'reckless', 'A must-read steamy cowboy romance from the Sunday Times bestselling author of Wild Love!', 15.49, 'images/reckless_elsie.jpg', '2023-04-07', 11, NULL, NULL, NULL, 'Chestnut Springs', 4),
+(17, 'hopeless', 'The perfect small-town romance from the Sunday Times bestselling author of Wild Love!', 15.99, 'images/hopeless.jpg', '2023-07-14', 11, NULL, NULL, NULL, 'Chestnut Springs', 5),
+(18, 'powerless', 'Only the extraordinary belong in the kingdom of Ilya . . . Red Queen meets The Hunger Games in the most epic and sizzling fantasy romance book of the year.\n\nThe Elites have possessed powers for decades, gifted to them by the Plague, while those born Ordinary are just that, banished from the kingdom of Ilya and shunned from society.\n\nNo one knows this better than Paedyn Gray, an Ordinary posing as a Psychic to blend in with the Elites. When she unsuspectingly saves one of Ilya’s princes, Kai Azer, she’s thrown into the Purging Trials, a brutal competition showcasing the Elites’ powers.\n\nIf the Trials and the opponents within them don’t kill her, the prince she’s fighting feelings for will if he discovers what Paedyn is . . . completely Ordinary.', 16.99, 'images/powerless_lauren.jpg', '2023-11-07', 12, NULL, NULL, NULL, 'Powerless', 1),
+(19, 'reckless', 'Paedyn and Kai battle with duty and desire in this highly anticipated second installment in the sizzling and epic romantic fantasy trilogy that’s packed with spicy tension and edge-of-your-seat betrayal.\n\nThe kingdom of Ilya is in turmoil…\n\nAfter surviving the Purging Trials, Ordinary-born Paedyn Gray has killed the King and kickstarted a Resistance throughout the land. Now she’s running from the one person she had wanted to run to.\n\nKai Azer is now Ilya’s Enforcer, loyal to his brother Kitt, the new King. He has vowed to find Paedyn and bring her to justice.\n\nAcross the deadly Scorches, and deep into the hostile city of Dor, Kai pursues the one person he wishes he didn’t have to. But in a city without Elites, the balance between the hunter and hunted shifts—and the battle between duty and desire is deadly.', 17.49, 'images/reckless_lauren.jpg', '2024-07-02', 12, NULL, NULL, NULL, 'Powerless', 2),
+(20, 'powerful', 'Set during the time of the New York Times bestseller Powerless, fan favorite Adena gets a story all her own as she attempts to survive on the streets of Loot...and falls for a mysterious—and dangerous—Elite.\n\nAdena and Paedyn have always been inseparable. Fate brought them together when they were young, but friendship ensured they would always protect each other and the home they built in the slums of Loot. But now Paedyn—an Ordinary—has been selected for the Purging Trials, which means almost certain death.\n\nNow alone in Loot, Adena must fend for herself. After attempting to steal, she\'s rescued by a mysterious man from the market. Mak\'s shadowy past and secretive power set him apart from the other low-level Elites of Loot. And as the pair team up to see their loved ones before the Trials, the quest tests their loyalty, their love, and their lives.', 15.99, 'images/powerful.jpg', '2024-04-30', 12, NULL, NULL, NULL, 'Powerless', 3),
+(21, 'ugly love', 'When nurse Tate runs into her neighbor Miles, she feels immediately drawn to him—and the feeling is mutual. Love, however, is out of the question: he doesn’t want a relationship, and she doesn’t have time for one. “Neighbors with benefits,” on the other hand… Their arrangement has a good chance of working, as long as Tate sticks to two rules: don’t ask about the past and don’t expect a future together. But how easy is it to stick to the rules?', 10.99, 'images/ugly love.jpg', '2014-08-05', 3, NULL, NULL, NULL, NULL, NULL),
+(22, 'november 9', 'On the day before her move, Fallon meets Ben, an ambitious writer. They spend her last day in Los Angeles together, and Fallon’s turbulent life becomes the inspiration Ben has always been searching for for his novel. In the years that follow, they continue to meet each other every November 9th—until one day Fallon is no longer sure whether Ben has always been telling her the truth. Can Ben’s relationship with Fallon—and his novel at the same time—really be considered a love story if it ends in heartbreak?', 11.49, 'images/november 9.jpg', '2015-11-10', 3, NULL, NULL, NULL, NULL, NULL),
+(23, 'throne of glass', 'In a land without magic, where the king rules with an iron hand, an assassin is summoned to the castle. She comes not to kill the king, but to win her freedom. If she defeats twenty-three killers, thieves, and warriors in a competition, she is released from prison to serve as the king\'s champion. Her name is Celaena Sardothien.\n\nThe Crown Prince will provoke her. The Captain of the Guard will protect her. But something evil dwells in the castle of glass—and it\'s there to kill. When her competitors start dying one by one, Celaena\'s fight for freedom becomes a fight for survival, and a desperate quest to root out the evil before it destroys her world.', 12.99, 'images/throne of glass.jpg', '2012-08-07', 9, NULL, NULL, NULL, 'Throne of Glass', 1),
+(24, 'crown of midnight', '\"A line that should never be crossed is about to be breached.\n\nIt puts this entire castle in jeopardy—and the life of your friend.\"\n\nFrom the throne of glass rules a king with a fist of iron and a soul as black as pitch. Assassin Celaena Sardothien won a brutal contest to become his Champion. Yet Celaena is far from loyal to the crown. She hides her secret vigilantly; she knows that the man she serves is bent on evil.\n\nKeeping up the deadly charade becomes increasingly difficult when Celaena realizes she is not the only one seeking justice. As she tries to untangle the mysteries buried deep within the glass castle, her closest relationships suffer. It seems no one is above questioning her allegiances—not the Crown Prince Dorian; not Chaol, the Captain of the Guard; not even her best friend, Nehemia, a foreign princess with a rebel heart.\n\nThen one terrible night, the secrets they have all been keeping lead to an unspeakable tragedy. As Celaena\'s world shatters, she will be forced to give up the very thing most precious to her and decide once and for all where her true loyalties lie... and whom she is ultimately willing to fight for.', 13.49, 'images/crown of midnight.jpg', '2013-08-15', 9, NULL, NULL, NULL, 'Throne of Glass', 2),
+(25, 'shadow and bone', 'Surrounded by enemies, the once-great nation of Ravka has been torn in two by the Shadow Fold, a swath of near impenetrable darkness crawling with monsters who feast on human flesh. Now its fate may rest on the shoulders of one lonely refugee.\n\nAlina Starkov has never been good at anything. But when her regiment is attacked on the Fold and her best friend is brutally injured, Alina reveals a dormant power that saves his life—a power that could be the key to setting her war-ravaged country free. Wrenched from everything she knows, Alina is whisked away to the royal court to be trained as a member of the Grisha, the magical elite led by the mysterious Darkling.\n\nYet nothing in this lavish world is what it seems. With darkness looming and an entire kingdom depending on her untamed power, Alina will have to confront the secrets of the Grisha . . . and the secrets of her heart.', 11.99, 'images/shadow and bone.jpg', '2012-06-05', 13, NULL, NULL, NULL, 'Grisha Trilogy', 1),
+(26, 'six of crows', 'Six dangerous outcasts. One impossible heist. Kaz Brekker and his crew attempt a daring mission that could make them rich beyond their wildest dreams—or get them killed.', 14.99, 'images/six of crows.jpg', '2015-09-29', 13, NULL, NULL, NULL, 'Six of Crows', 1),
+(27, 'red queen', 'In a world divided by blood—red or silver—Mare Barrow discovers she has a deadly power despite her red blood. Her life is turned upside down when she is thrust into the dangerous world of the Silver elite.', 12.49, 'images/red queen.jpg', '2015-02-10', 14, NULL, NULL, NULL, NULL, NULL),
+(28, 'the cruel prince', 'Jude was seven when her parents were murdered and she was taken to live in the treacherous High Court of Faerie. Ten years later, she wants nothing more than to belong—even if it means defying a prince.', 13.99, 'images/the cruel prince.jpg', '2018-01-02', 15, NULL, NULL, NULL, NULL, NULL),
+(29, 'Fearless', 'Ordinary-born Paedyn Gray was prepared for a death sentence, not a proposal. After killing the king, marriage to his son, Kitt, was the last thing she—or the kingdom—expected. But with her role as queen, Paedyn would have the chance to unite Ilya and create a kingdom where Ordinaries live alongside Elites without fear.\r\n\r\nWith a decision looming, Paedyn battles between her head, her heart, and the hidden trials she now faces. Through it all, Kai Azer fights to call her his, even if it means defying his king. Are vows strong enough to unite a kingdom? Or will betrayal break them? The choice between sacrifice and self has never been more difficult . . . or deadly.\r\n\r\nThe final installment in the epic and sizzling fantasy romance trilogy that\'s taken the world by storm.', 19.99, 'images/fearless.jpg', '2024-01-01', 12, NULL, NULL, NULL, NULL, NULL),
+(30, 'demo product', 'fun fun', 12.99, 'images/book_1767912834_9861e785.jpeg', NULL, 4, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `book_genre`
+--
+
+CREATE TABLE `book_genre` (
+  `book_id` int(11) NOT NULL,
+  `genre_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `book_genre`
+--
+
+INSERT INTO `book_genre` (`book_id`, `genre_id`) VALUES
+(1, 2),
+(2, 2),
+(3, 1),
+(4, 2),
+(5, 1),
+(5, 3),
+(6, 1),
+(6, 3),
+(7, 1),
+(8, 2),
+(9, 1),
+(10, 1),
+(10, 4),
+(10, 5),
+(10, 6),
+(11, 1),
+(11, 3),
+(12, 3),
+(12, 7),
+(23, 4),
+(23, 5),
+(24, 4),
+(24, 5),
+(25, 4),
+(25, 5),
+(29, 1),
+(30, 1),
+(30, 2),
+(30, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `cart`
+--
+
+CREATE TABLE `cart` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT 1,
+  `added_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `coupon`
+--
+
+CREATE TABLE `coupon` (
+  `id` int(11) NOT NULL,
+  `code` varchar(50) NOT NULL,
+  `discount_type` enum('amount','percent') NOT NULL,
+  `discount_value` decimal(10,2) NOT NULL,
+  `starts_at` timestamp NULL DEFAULT NULL,
+  `ends_at` timestamp NULL DEFAULT NULL,
+  `max_uses` int(11) DEFAULT NULL,
+  `uses_count` int(11) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `genre`
+--
+
+CREATE TABLE `genre` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `genre`
+--
+
+INSERT INTO `genre` (`id`, `name`) VALUES
+(1, 'fiction'),
+(2, 'poetry'),
+(3, 'romance'),
+(4, 'fantasy'),
+(5, 'young adult'),
+(6, 'romantasy'),
+(7, 'sad');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `order`
+--
+
+CREATE TABLE `order` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `subtotal` decimal(10,2) DEFAULT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `currency` char(3) NOT NULL DEFAULT 'EUR',
+  `shipping_cost` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `tax_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `discount_total` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `grand_total` decimal(10,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `order`
+--
+
+INSERT INTO `order` (`id`, `user_id`, `subtotal`, `status`, `created_at`, `currency`, `shipping_cost`, `tax_amount`, `discount_total`, `grand_total`) VALUES
+(4, 1, 11.39, 'paid', '2026-01-08 13:06:24', 'UNI', 0.00, 0.00, 0.00, 11.39),
+(5, 1, 36.98, 'paid', '2026-01-08 16:49:12', 'UNI', 0.00, 0.00, 0.00, 36.98),
+(6, 4, 12.99, 'paid', '2026-01-08 22:56:58', 'UNI', 0.00, 0.00, 0.00, 12.99);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `order_address`
+--
+
+CREATE TABLE `order_address` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `type` enum('billing','shipping') NOT NULL,
+  `full_name` varchar(150) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `street` varchar(150) NOT NULL,
+  `house_number` varchar(20) NOT NULL,
+  `house_number_addition` varchar(20) DEFAULT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `city` varchar(100) NOT NULL,
+  `region` varchar(100) DEFAULT NULL,
+  `country_code` char(2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `order_book`
+--
+
+CREATE TABLE `order_book` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  `book_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `price` decimal(6,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `order_book`
+--
+
+INSERT INTO `order_book` (`id`, `order_id`, `book_id`, `quantity`, `price`) VALUES
+(1, 4, 4, 1, 11.39),
+(2, 5, 18, 1, 16.99),
+(3, 5, 29, 1, 19.99),
+(4, 6, 30, 1, 12.99);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `order_discount`
+--
+
+CREATE TABLE `order_discount` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `coupon_id` int(11) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `order_status_history`
+--
+
+CREATE TABLE `order_status_history` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `old_status` varchar(50) DEFAULT NULL,
+  `new_status` varchar(50) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `changed_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `payment`
+--
+
+CREATE TABLE `payment` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `provider` varchar(50) NOT NULL,
+  `provider_tx_id` varchar(100) DEFAULT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `currency` char(3) NOT NULL DEFAULT 'EUR',
+  `status` enum('pending','authorized','paid','failed','refunded','cancelled') NOT NULL DEFAULT 'pending',
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `raw_payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`raw_payload`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `review`
+--
+
+CREATE TABLE `review` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `rating` tinyint(4) NOT NULL,
+  `comment` text NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `review`
+--
+
+INSERT INTO `review` (`id`, `user_id`, `book_id`, `rating`, `comment`, `created_at`) VALUES
+(6, 1, 5, 5, 'Eén van mijn favoriete boeken ooit.', '2025-12-29 19:12:07'),
+(7, 1, 10, 4, 'Zeer leuk, aanrader voor fantasy fans.', '2026-01-03 19:12:07'),
+(8, 1, 9, 3, 'Goed boek maar niet helemaal mijn ding.', '2026-01-06 19:12:07'),
+(9, 1, 4, 5, 'i really liked this one', '2026-01-08 20:02:02'),
+(10, 4, 30, 2, 'fun fun', '2026-01-08 23:57:29');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `serie`
+--
+
+CREATE TABLE `serie` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `serie`
+--
+
+INSERT INTO `serie` (`id`, `name`) VALUES
+(1, 'Chestnut Springs'),
+(2, 'Powerless'),
+(3, 'Throne of Glass'),
+(4, 'Grisha Trilogy'),
+(5, 'Six of Crows');
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `shipment`
+--
+
+CREATE TABLE `shipment` (
+  `id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `carrier` varchar(50) DEFAULT NULL,
+  `tracking_code` varchar(100) DEFAULT NULL,
+  `status` enum('pending','packed','shipped','delivered','returned','cancelled') NOT NULL DEFAULT 'pending',
+  `shipped_at` timestamp NULL DEFAULT NULL,
+  `delivered_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `user`
+--
+
+CREATE TABLE `user` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `role` enum('user','admin') DEFAULT 'user',
+  `units` int(11) NOT NULL DEFAULT 1000,
+  `reset_token_hash` varchar(255) DEFAULT NULL,
+  `reset_token_expires` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `user`
+--
+
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `created_at`, `role`, `units`, `reset_token_hash`, `reset_token_expires`) VALUES
+(1, 'annabel', 'smeuldersannabel@gmail.com', '$2y$10$73SvwOzUpPbPmTI7Qk2R/.JW5RnUT3.o0UIYyACDu4fvfVbPxXFHS', '2026-01-02 18:04:50', 'user', 516, NULL, NULL),
+(3, 'admin', 'admin@admin.com', '$2y$10$Rjsw8wEDqx.G.xU94j1Y9eIuJ7bxp3DYRPw9gBqwpRIqm9X1.mVVK', '2026-01-02 18:06:03', 'admin', 1000, NULL, NULL),
+(4, 'user', 'user@user.com', '$2y$10$4/TPbZEHXbt82vdsSw4DheeZJa2BT4FhYsWL80/tfBViXWdMvSNke$argon2id$v=19$m=19456,t=2,p=1$ZGI2ZDRmNWI4NzBkNmM2NWZiZGY2MGEzMjZkMGY0OGQ$dj+yxTUp7R59CUmo1tA0R8szUlxT7DO+LJyzCJ0PD+I', '2026-01-02 18:07:57', 'user', 870, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Tabelstructuur voor tabel `wishlist`
+--
+
+CREATE TABLE `wishlist` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `added_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Gegevens worden geëxporteerd voor tabel `wishlist`
+--
+
+INSERT INTO `wishlist` (`id`, `user_id`, `book_id`, `added_at`) VALUES
+(1, 1, 2, '2026-01-08 01:55:35'),
+(2, 1, 4, '2026-01-08 01:55:17'),
+(4, 1, 17, '2026-01-08 01:55:49'),
+(5, 1, 22, '2026-01-08 01:56:37'),
+(6, 1, 12, '2026-01-08 01:56:47'),
+(7, 4, 30, '2026-01-08 22:55:45');
+
+--
+-- Indexen voor geëxporteerde tabellen
+--
+
+--
+-- Indexen voor tabel `address`
+--
+ALTER TABLE `address`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_user_type` (`user_id`,`type`);
+
+--
+-- Indexen voor tabel `author`
+--
+ALTER TABLE `author`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `book`
+--
+ALTER TABLE `book`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_book_isbn` (`isbn`),
+  ADD KEY `idx_title` (`title`),
+  ADD KEY `fk_author` (`author_id`),
+  ADD KEY `fk_book_series` (`serie_id`);
+
+--
+-- Indexen voor tabel `book_genre`
+--
+ALTER TABLE `book_genre`
+  ADD PRIMARY KEY (`book_id`,`genre_id`),
+  ADD KEY `genre_id` (`genre_id`);
+
+--
+-- Indexen voor tabel `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uq_cart_user_book` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uniq_cart_user_book` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uniq_user_book` (`user_id`,`book_id`),
+  ADD KEY `book_id` (`book_id`),
+  ADD KEY `idx_cart_user` (`user_id`);
+
+--
+-- Indexen voor tabel `coupon`
+--
+ALTER TABLE `coupon`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_coupon_code` (`code`);
+
+--
+-- Indexen voor tabel `genre`
+--
+ALTER TABLE `genre`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `order`
+--
+ALTER TABLE `order`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_order_user` (`user_id`);
+
+--
+-- Indexen voor tabel `order_address`
+--
+ALTER TABLE `order_address`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_order_address` (`order_id`,`type`);
+
+--
+-- Indexen voor tabel `order_book`
+--
+ALTER TABLE `order_book`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_order_book_order_book` (`order_id`,`book_id`),
+  ADD UNIQUE KEY `uq_order_book` (`order_id`,`book_id`),
+  ADD KEY `idx_order_book_order` (`order_id`),
+  ADD KEY `idx_order_book_book` (`book_id`);
+
+--
+-- Indexen voor tabel `order_discount`
+--
+ALTER TABLE `order_discount`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_order_discount_order` (`order_id`),
+  ADD KEY `fk_order_discount_coupon` (`coupon_id`);
+
+--
+-- Indexen voor tabel `order_status_history`
+--
+ALTER TABLE `order_status_history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_osh_order` (`order_id`);
+
+--
+-- Indexen voor tabel `payment`
+--
+ALTER TABLE `payment`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_payment_order` (`order_id`),
+  ADD KEY `idx_payment_provider_tx` (`provider_tx_id`);
+
+--
+-- Indexen voor tabel `review`
+--
+ALTER TABLE `review`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uniq_user_book` (`user_id`,`book_id`),
+  ADD KEY `idx_book` (`book_id`);
+
+--
+-- Indexen voor tabel `serie`
+--
+ALTER TABLE `serie`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexen voor tabel `shipment`
+--
+ALTER TABLE `shipment`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_shipment_tracking` (`carrier`,`tracking_code`),
+  ADD KEY `idx_shipment_order` (`order_id`);
+
+--
+-- Indexen voor tabel `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `uq_user_email` (`email`),
+  ADD UNIQUE KEY `unique_email` (`email`);
+
+--
+-- Indexen voor tabel `wishlist`
+--
+ALTER TABLE `wishlist`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `user_id_2` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uq_wishlist_user_book` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uniq_wishlist_user_book` (`user_id`,`book_id`),
+  ADD UNIQUE KEY `uniq_user_book` (`user_id`,`book_id`),
+  ADD KEY `book_id` (`book_id`),
+  ADD KEY `idx_wishlist_user` (`user_id`);
+
+--
+-- AUTO_INCREMENT voor geëxporteerde tabellen
+--
+
+--
+-- AUTO_INCREMENT voor een tabel `address`
+--
+ALTER TABLE `address`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT voor een tabel `author`
+--
+ALTER TABLE `author`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT voor een tabel `book`
+--
+ALTER TABLE `book`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT voor een tabel `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT voor een tabel `coupon`
+--
+ALTER TABLE `coupon`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `genre`
+--
+ALTER TABLE `genre`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT voor een tabel `order`
+--
+ALTER TABLE `order`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT voor een tabel `order_address`
+--
+ALTER TABLE `order_address`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `order_book`
+--
+ALTER TABLE `order_book`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT voor een tabel `order_discount`
+--
+ALTER TABLE `order_discount`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `order_status_history`
+--
+ALTER TABLE `order_status_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `payment`
+--
+ALTER TABLE `payment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `review`
+--
+ALTER TABLE `review`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT voor een tabel `shipment`
+--
+ALTER TABLE `shipment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT voor een tabel `user`
+--
+ALTER TABLE `user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT voor een tabel `wishlist`
+--
+ALTER TABLE `wishlist`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- Beperkingen voor geëxporteerde tabellen
+--
+
+--
+-- Beperkingen voor tabel `address`
+--
+ALTER TABLE `address`
+  ADD CONSTRAINT `fk_address_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `book`
+--
+ALTER TABLE `book`
+  ADD CONSTRAINT `fk_author` FOREIGN KEY (`author_id`) REFERENCES `author` (`id`),
+  ADD CONSTRAINT `fk_book_series` FOREIGN KEY (`serie_id`) REFERENCES `serie` (`id`);
+
+--
+-- Beperkingen voor tabel `book_genre`
+--
+ALTER TABLE `book_genre`
+  ADD CONSTRAINT `book_genre_ibfk_1` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `book_genre_ibfk_2` FOREIGN KEY (`genre_id`) REFERENCES `genre` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `order`
+--
+ALTER TABLE `order`
+  ADD CONSTRAINT `fk_order_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `order_address`
+--
+ALTER TABLE `order_address`
+  ADD CONSTRAINT `fk_order_address_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `order_book`
+--
+ALTER TABLE `order_book`
+  ADD CONSTRAINT `fk_order_book_book` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_order_book_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `order_discount`
+--
+ALTER TABLE `order_discount`
+  ADD CONSTRAINT `fk_order_discount_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupon` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_order_discount_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `order_status_history`
+--
+ALTER TABLE `order_status_history`
+  ADD CONSTRAINT `fk_osh_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `payment`
+--
+ALTER TABLE `payment`
+  ADD CONSTRAINT `fk_payment_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `review`
+--
+ALTER TABLE `review`
+  ADD CONSTRAINT `fk_review_book` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_review_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `shipment`
+--
+ALTER TABLE `shipment`
+  ADD CONSTRAINT `fk_shipment_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`id`) ON DELETE CASCADE;
+
+--
+-- Beperkingen voor tabel `wishlist`
+--
+ALTER TABLE `wishlist`
+  ADD CONSTRAINT `wishlist_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `wishlist_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `book` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
