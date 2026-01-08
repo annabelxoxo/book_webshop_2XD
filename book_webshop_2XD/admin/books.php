@@ -5,9 +5,17 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
+function asset_url(string $path): string {
+  $path = trim($path);
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
 
 if (empty($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("admin/books.php"));
   exit;
 }
 
@@ -17,7 +25,6 @@ $authorId = (int)($_GET["author_id"] ?? 0);
 $success = "";
 $error = "";
 
-
 $authors = [];
 try {
   $aStmt = $pdo->query("SELECT id, name FROM author ORDER BY name ASC");
@@ -25,7 +32,6 @@ try {
 } catch (Throwable $e) {
   $authors = [];
 }
-
 
 $sql = "
   SELECT b.id, b.title, b.price, b.cover_image, a.name AS author_name
@@ -65,40 +71,40 @@ try {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin - Books</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css" />
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css" />
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container">
 
-    <section class="cart-head" >
+    <section class="cart-head">
       <div>
         <h2>Manage books</h2>
         <p class="cart-sub">Search, add, edit or delete books.</p>
       </div>
 
       <div>
-        <a class="btn-secondary" href="book_webshop_2XD/admin/dashboard.php">← Dashboard</a>
-        <a class="btn-primary" href="book_webshop_2XD/admin/book_create.php">+ Add book</a>
+        <a class="btn-secondary" href="<?= APP_URL ?>admin/dashboard.php">← Dashboard</a>
+        <a class="btn-primary" href="<?= APP_URL ?>admin/book_create.php">+ Add book</a>
       </div>
     </section>
 
     <?php if ($error): ?>
-      <p class="error"><?= htmlspecialchars($error) ?></p>
+      <p class="error"><?= h($error) ?></p>
     <?php endif; ?>
 
     <?php if ($success): ?>
-      <p class="success"><?= htmlspecialchars($success) ?></p>
+      <p class="success"><?= h($success) ?></p>
     <?php endif; ?>
 
     <form method="get" class="catalog-form">
       <div class="control">
         <label>Search</label>
-        <input type="text" name="q" value="<?= htmlspecialchars($q) ?>" placeholder="Title or author..." />
+        <input type="text" name="q" value="<?= h($q) ?>" placeholder="Title or author..." />
       </div>
 
       <div class="control">
@@ -107,7 +113,7 @@ try {
           <option value="0">All authors</option>
           <?php foreach ($authors as $a): ?>
             <option value="<?= (int)$a["id"] ?>" <?= $authorId === (int)$a["id"] ? "selected" : "" ?>>
-              <?= htmlspecialchars($a["name"]) ?>
+              <?= h($a["name"]) ?>
             </option>
           <?php endforeach; ?>
         </select>
@@ -115,7 +121,7 @@ try {
 
       <div class="control-btns">
         <button class="btn-primary" type="submit">Filter</button>
-        <a class="btn-secondary" href="book_webshop_2XD/admin/books.php">Reset</a>
+        <a class="btn-secondary" href="<?= APP_URL ?>admin/books.php">Reset</a>
       </div>
     </form>
 
@@ -125,18 +131,22 @@ try {
       </div>
     <?php else: ?>
 
-
       <div class="catalog-grid">
         <?php foreach ($books as $b): ?>
-          <?php $units = (int)round(((float)$b["price"]) * 10); ?>
+          <?php
+            $units = (int)round(((float)$b["price"]) * 10);
+            $coverUrl = asset_url((string)($b["cover_image"] ?? ""));
+          ?>
           <article class="catalog-card">
-            <a class="catalog-card-link" href="book_webshop_2XD/product.php?id=<?= (int)$b["id"] ?>">
+            <a class="catalog-card-link" href="<?= APP_URL ?>product.php?id=<?= (int)$b["id"] ?>">
               <div class="catalog-img">
-                <img src="<?= htmlspecialchars($b["cover_image"]) ?>" alt="<?= htmlspecialchars($b["title"]) ?>">
+                <?php if ($coverUrl): ?>
+                  <img src="<?= h($coverUrl) ?>" alt="<?= h($b["title"]) ?>">
+                <?php endif; ?>
               </div>
               <div class="catalog-info">
-                <h3><?= htmlspecialchars(ucwords($b["title"])) ?></h3>
-                <p class="catalog-author"><?= htmlspecialchars($b["author_name"]) ?></p>
+                <h3><?= h(ucwords((string)$b["title"])) ?></h3>
+                <p class="catalog-author"><?= h($b["author_name"]) ?></p>
                 <p class="catalog-price">
                   €<?= number_format((float)$b["price"], 2, ",", ".") ?>
                   <span class="catalog-units">(<?= $units ?> units)</span>
@@ -146,12 +156,12 @@ try {
             </a>
 
             <div class="wishlist-actions">
-              <a class="btn-secondary" href="book_webshop_2XD/admin/book_edit.php?id=<?= (int)$b["id"] ?>">
+              <a class="btn-secondary" href="<?= APP_URL ?>admin/book_edit.php?id=<?= (int)$b["id"] ?>">
                 Edit
               </a>
 
               <a class="btn-secondary"
-                 href="book_webshop_2XD/admin/book_delete.php?id=<?= (int)$b["id"] ?>"
+                 href="<?= APP_URL ?>admin/book_delete.php?id=<?= (int)$b["id"] ?>"
                  onclick="return confirm('Delete this book?')">
                 Delete
               </a>
@@ -165,7 +175,6 @@ try {
   </div>
 </main>
 
-<?php include __DIR__ . "/../includes/footer.php"; ?>
-
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

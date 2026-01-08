@@ -5,6 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+/* ===== STATUS ===== */
+
 function isLoggedIn(): bool {
     return isset($_SESSION['user_id']);
 }
@@ -17,24 +19,20 @@ function isAdmin(): bool {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
 }
 
+/* ===== GUARDS ===== */
+
 function requireLogin(): void {
     if (!isLoggedIn()) {
-        header('Location: login.php');
-        exit();
+        $redirect = basename($_SERVER['REQUEST_URI']);
+        header("Location: " . APP_URL . "login.php?redirect=" . urlencode($redirect));
+        exit;
     }
 }
 
 function requireAdmin(): void {
-    if (!isLoggedIn()) {
-        header("Location: login.php");
-        exit();
+    if (!isLoggedIn() || !isAdmin()) {
+        $redirect = basename($_SERVER['REQUEST_URI']);
+        header("Location: " . APP_URL . "login.php?redirect=" . urlencode($redirect));
+        exit;
     }
 }
-
-if (!isAdmin()) {
-    http_response_code(403);
-    echo "Access denied. Admins only.";
-    exit(); 
-}
-
-?>

@@ -3,40 +3,49 @@ require __DIR__ . "/includes/config.php";
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (!isset($_SESSION["user_id"])) {
-  header("Location: /book_webshop_2XD/login.php");
-  exit;
-}
-
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
 
-$userId = (int)$_SESSION["user_id"];
-$error = "";
+// Bouw een absolute URL (handig voor mail/test links)
+function absolute_url(string $pathWithQuery): string {
+  $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+  $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+  return $scheme . '://' . $host . APP_URL . ltrim($pathWithQuery, '/');
+}
+
 $success = "";
+$error = "";
+$email = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $current = (string)($_POST["current_password"] ?? "");
-  $new1 = (string)($_POST["new_password"] ?? "");
-  $new2 = (string)($_POST["new_password2"] ?? "");
+  $email = trim((string)($_POST["email"] ?? ""));
 
-  if ($current === "" || $new1 === "" || $new2 === "") {
-    $error = "Please fill in all fields.";
-  } elseif (strlen($new1) < 6) {
-    $error = "New password must be at least 6 characters.";
-  } elseif ($new1 !== $new2) {
-    $error = "New passwords do not match.";
+  if ($email === "" || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $error = "Please enter a valid email.";
   } else {
-    $stmt = $pdo->prepare("SELECT password FROM user WHERE id=? LIMIT 1");
-    $stmt->execute([$userId]);
-    $hash = (string)($stmt->fetchColumn() ?? "");
 
-    if (!$hash || !password_verify($current, $hash)) {
-      $error = "Current password is incorrect.";
-    } else {
-      $newHash = password_hash($new1, PASSWORD_DEFAULT);
-      $upd = $pdo->prepare("UPDATE user SET password=? WHERE id=? LIMIT 1");
-      $upd->execute([$newHash, $userId]);
-      $success = "Password updated.";
+    $success = "If that email exists, you'll receive a reset link.";
+
+    try {
+      $stmt = $pdo->prepare("SELECT id FROM user WHERE email = ? LIMIT 1");
+      $stmt->execute([$email]);
+      $uid = (int)($stmt->fetchColumn() ?? 0);
+
+      if ($uid > 0) {
+        $token = bin2hex(random_bytes(32));
+        $hash = password_hash($token, PASSWORD_DEFAULT);
+        $expires = date("Y-m-d H:i:s", time() + 60*30);
+
+        $upd = $pdo->prepare("UPDATE user SET reset_token_hash=?, reset_token_expires=? WHERE id=? LIMIT 1");
+        $upd->execute([$hash, $expires, $uid]);
+
+        // TEST: link tonen (later mailen)
+        $resetPath = "reset_password.php?email=" . urlencode($email) . "&token=" . urlencode($token);
+        $resetLink = absolute_url($resetPath);
+
+        $success .= "<br><small>TEST LINK: <a href='" . h($resetLink) . "'>Reset password</a></small>";
+      }
+    } catch (Throwable $e) {
+      // bewust leeg: geen info lekken
     }
   }
 }
@@ -46,51 +55,47 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Change password - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+  <title>Forgot password - Book Webshop</title>
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include 'includes/header.php'; ?>
+<?php require_once __DIR__ . '/includes/header.php'; ?>
 
-<main>
-  <div class="container" >
+<main class="auth-page">
+  <section class="auth-layout">
+    <div class="auth-left">
+      <h2>RESET<br>PASSWORD</h2>
+      <p>Enter your email and we'll send you a reset link.</p>
+    </div>
 
-    <a class="btn-secondary" href="book_webshop_2XD/profile.php">← Back to profile</a>
+    <div class="auth-right">
+      <div class="auth-card">
+        <h3>Forgot password</h3>
 
-    <h2 >Change password</h2>
+        <?php if ($error): ?>
+          <p class="error"><?= h($error) ?></p>
+        <?php endif; ?>
 
-    <?php if ($error): ?>
-      <p class="error"><?= h($error) ?></p>
-    <?php endif; ?>
+        <?php if ($success): ?>
+          <p class="success"><?= $success ?></p>
+        <?php endif; ?>
 
-    <?php if ($success): ?>
-      <p class="success"><?= h($success) ?></p>
-    <?php endif; ?>
+        <form method="post">
+          <label>Email</label>
+          <input type="email" name="email" value="<?= h($email) ?>" required>
+          <button class="auth-btn" type="submit">Send reset link</button>
+        </form>
 
-    <form method="post" class="contact-form">
-      <div class="form-group">
-        <label>Current password *</label>
-        <input type="password" name="current_password" required>
+        <p class="auth-bottom">
+          Back to <a href="<?= APP_URL ?>login.php">Login</a>
+        </p>
       </div>
-
-      <div class="form-group">
-        <label>New password *</label>
-        <input type="password" name="new_password" required>
-      </div>
-
-      <div class="form-group">
-        <label>Repeat new password *</label>
-        <input type="password" name="new_password2" required>
-      </div>
-
-      <button type="submit" class="btn-primary">Save</button>
-    </form>
-
-  </div>
+    </div>
+  </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

@@ -63,12 +63,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reset password - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include 'includes/header.php'; ?>
+<?php include __DIR__ . "/includes/header.php"; ?>
 
 <main class="auth-page">
   <section class="auth-layout">
@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <?php if ($success): ?>
           <p class="success"><?= h($success) ?></p>
-          <p class="auth-bottom"><a href="book_webshop_2XD/login.php">Go to login</a></p>
+          <p class="auth-bottom"><a href="<?= APP_URL ?>login.php">Go to login</a></p>
         <?php else: ?>
           <form method="post">
             <label>New password</label>
@@ -104,6 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . "/includes/footer.php"; ?>
 </body>
 </html>

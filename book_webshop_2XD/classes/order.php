@@ -4,7 +4,7 @@ require __DIR__ . "/../includes/config.php";
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!isset($_SESSION["user_id"])) {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("classes/order.php"));
   exit;
 }
 
@@ -39,12 +39,12 @@ try {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My orders - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container">
@@ -55,7 +55,7 @@ try {
         <p class="admin-sub">Your order history (paid with units).</p>
       </div>
 
-      <a class="btn-secondary" href="book_webshop_2XD/profile.php">← Back to profile</a>
+      <a class="btn-secondary" href="<?= APP_URL ?>profile.php">← Back to profile</a>
     </section>
 
     <?php if ($error): ?>
@@ -65,7 +65,7 @@ try {
     <?php if (empty($orders)): ?>
       <div class="cart-empty">
         <p>You have no orders yet.</p>
-        <a class="btn-primary" href="book_webshop_2XD/catalog.php">Browse catalog</a>
+        <a class="btn-primary" href="<?= APP_URL ?>catalog.php">Browse catalog</a>
       </div>
     <?php else: ?>
 
@@ -86,9 +86,7 @@ try {
 
             <tbody>
               <?php foreach ($orders as $o): ?>
-                <?php
-                  $unitsPaid = (int)round(((float)($o["grand_total"] ?? 0)) * 10);
-                ?>
+                <?php $unitsPaid = (int)round(((float)($o["grand_total"] ?? 0)) * 10); ?>
                 <tr>
                   <td>#<?= (int)$o["id"] ?></td>
 
@@ -111,7 +109,7 @@ try {
                   </td>
 
                   <td>
-                    <a class="btn-secondary" href="book_webshop_2XD/checkout_success.php?id=<?= (int)$o["id"] ?>">
+                    <a class="btn-secondary" href="<?= APP_URL ?>checkout_success.php?id=<?= (int)$o["id"] ?>">
                       View
                     </a>
                   </td>
@@ -128,6 +126,6 @@ try {
   </div>
 </main>
 
-<?php include __DIR__ . "/../includes/footer.php"; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

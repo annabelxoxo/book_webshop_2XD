@@ -1,7 +1,17 @@
 <?php
 require __DIR__ . "/includes/config.php";
 
-$search = trim($_GET['q'] ?? '');
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
+// veilig voor cover_image (zelfde idee als eerder)
+function asset_url(string $path): string {
+  $path = trim($path);
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
+
+$search  = trim((string)($_GET['q'] ?? ''));
 $genreId = (int)($_GET['genre'] ?? 0);
 
 $sql = "
@@ -45,12 +55,12 @@ $genres = $genresStmt->fetchAll();
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catalog - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 
 <body>
-<?php include 'includes/header.php'; ?>
+<?php require_once __DIR__ . '/includes/header.php'; ?>
 
 <main>
   <div class="container">
@@ -69,7 +79,7 @@ $genres = $genresStmt->fetchAll();
             <option value="0">All genres</option>
             <?php foreach ($genres as $g): ?>
               <option value="<?= (int)$g['id'] ?>" <?= $genreId === (int)$g['id'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($g['name']) ?>
+                <?= h($g['name']) ?>
               </option>
             <?php endforeach; ?>
           </select>
@@ -77,7 +87,7 @@ $genres = $genresStmt->fetchAll();
 
         <div class="control control-btns">
           <button type="submit" class="btn-primary">Apply</button>
-          <a class="btn-secondary" href="book_webshop_2XD/catalog.php">Reset</a>
+          <a class="btn-secondary" href="<?= APP_URL ?>catalog.php">Reset</a>
         </div>
       </form>
 
@@ -93,20 +103,25 @@ $genres = $genresStmt->fetchAll();
       <?php endif; ?>
 
       <?php foreach ($books as $book): ?>
-        <?php $units = (int) round(((float)$book['price']) * 10); ?>
+        <?php
+          $units = (int) round(((float)$book['price']) * 10);
+          $coverUrl = asset_url((string)($book['cover_image'] ?? ''));
+        ?>
 
         <article class="catalog-card">
-          <a href="book_webshop_2XD/product.php?id=<?= (int)$book['id'] ?>" class="catalog-card-link">
+          <a href="<?= APP_URL ?>product.php?id=<?= (int)$book['id'] ?>" class="catalog-card-link">
             <div class="catalog-img">
-              <img
-                src="<?= htmlspecialchars($book['cover_image']) ?>"
-                alt="<?= htmlspecialchars($book['title']) ?>"
-              />
+              <?php if ($coverUrl): ?>
+                <img
+                  src="<?= h($coverUrl) ?>"
+                  alt="<?= h($book['title']) ?>"
+                />
+              <?php endif; ?>
             </div>
 
             <div class="catalog-info">
-              <h3><?= htmlspecialchars(ucwords($book['title'])) ?></h3>
-              <p class="catalog-author">by <?= htmlspecialchars($book['author']) ?></p>
+              <h3><?= h(ucwords((string)$book['title'])) ?></h3>
+              <p class="catalog-author">by <?= h($book['author']) ?></p>
 
               <p class="catalog-price">
                 €<?= number_format((float)$book['price'], 2, ',', '.') ?>
@@ -124,6 +139,6 @@ $genres = $genresStmt->fetchAll();
   </div>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

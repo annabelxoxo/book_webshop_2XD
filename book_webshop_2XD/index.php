@@ -9,6 +9,8 @@ $stmt = $pdo->query("
 ");
 
 $books = $stmt->fetchAll();
+
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 ?>
 
 <!DOCTYPE html>
@@ -17,13 +19,13 @@ $books = $stmt->fetchAll();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 
 <body>
 
-<?php include 'includes/header.php'; ?>
+<?php include __DIR__ . '/includes/header.php'; ?>
 
 <main>
   <div class="container">
@@ -38,22 +40,22 @@ $books = $stmt->fetchAll();
 
       <div class="book-list">
         <?php
-        $top = array_slice($books, 0, 3);
+          $top = array_slice($books, 0, 3);
 
-        foreach ($top as $book) {
-          $units = (int) round(((float)$book['price']) * 10);
+          foreach ($top as $book) {
+            $units = (int) round(((float)$book['price']) * 10);
 
-          echo "
-          <a class='book-item' href='book_webshop_2XD/product.php?id=".(int)$book['id']."'>
-            <img src='".htmlspecialchars($book['cover_image'])."' alt='".htmlspecialchars($book['title'])."'>
-            <h3>".htmlspecialchars(ucwords($book['title']))."</h3>
-            <p>by ".htmlspecialchars($book['author'])."</p>
-            <p class='price'>
-              €".number_format((float)$book['price'], 2, ',', '.')."
-              <span class='units'>(".$units." units)</span>
-            </p>
-          </a>";
-        }
+            echo "
+            <a class='book-item' href='" . APP_URL . "product.php?id=".(int)$book['id']."'>
+              <img src='" . h($book['cover_image']) . "' alt='" . h($book['title']) . "'>
+              <h3>" . h(ucwords($book['title'])) . "</h3>
+              <p>by " . h($book['author']) . "</p>
+              <p class='price'>
+                €" . number_format((float)$book['price'], 2, ',', '.') . "
+                <span class='units'>(" . $units . " units)</span>
+              </p>
+            </a>";
+          }
         ?>
       </div>
     </section>
@@ -107,7 +109,7 @@ $books = $stmt->fetchAll();
   </div>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/includes/footer.php'; ?>
 
 </body>
 </html>

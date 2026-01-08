@@ -1,13 +1,14 @@
 <?php
+require __DIR__ . "/includes/config.php";
 
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-
+// alle sessie-variabelen leegmaken
 $_SESSION = [];
 
-
+// sessiecookie verwijderen
 if (ini_get("session.use_cookies")) {
   $params = session_get_cookie_params();
   setcookie(
@@ -21,9 +22,9 @@ if (ini_get("session.use_cookies")) {
   );
 }
 
-
+// sessie vernietigen
 session_destroy();
 
-
-header("Location: /book_webshop_2XD/book_webshop_2XD/login.php");
+// ✅ ALTIJD via APP_URL redirecten
+header("Location: " . APP_URL . "login.php");
 exit;

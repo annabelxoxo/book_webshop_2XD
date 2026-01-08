@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = "Passwords do not match.";
   } else {
 
-
     $stmt = $pdo->prepare("SELECT id FROM user WHERE email = ?");
     $stmt->execute([$email]);
     $exists = $stmt->fetch();
@@ -33,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $error = "This email is already registered.";
     } else {
       $hash = password_hash($password, PASSWORD_DEFAULT);
-
 
       $startUnits = 1000;
 
@@ -44,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $stmt->execute([$name, $email, $hash, $startUnits]);
 
       $success = "Account created! You received {$startUnits} units. You can now login.";
-      
 
       $name = "";
       $email = "";
@@ -59,13 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 
 <body>
 
-<?php include 'includes/header.php'; ?>
+<?php include __DIR__ . "/includes/header.php"; ?>
 
 <main class="auth-page">
   <section class="auth-layout">
@@ -98,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="password-wrapper">
             <input type="password" id="password" name="password" required>
             <button type="button" id="togglePassword" aria-label="Show password">
-              <img id="eyeIcon" src="book_webshop_2XD/images/hide.png" alt="Show password">
+              <img id="eyeIcon" src="<?= APP_URL ?>images/hide.png" alt="Show password">
             </button>
           </div>
 
@@ -106,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="password-wrapper">
             <input type="password" id="password2" name="password2" required>
             <button type="button" id="togglePassword2" aria-label="Show password">
-              <img id="eyeIcon2" src="book_webshop_2XD/images/hide.png" alt="Show password">
+              <img id="eyeIcon2" src="<?= APP_URL ?>images/hide.png" alt="Show password">
             </button>
           </div>
 
@@ -114,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <p class="auth-bottom">
-          Already have an account? <a href="book_webshop_2XD/login.php">Login here</a>.
+          Already have an account? <a href="<?= APP_URL ?>login.php">Login here</a>.
         </p>
       </div>
     </div>
@@ -122,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </section>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . "/includes/footer.php"; ?>
 
 <script>
   const pw1 = document.getElementById("password");
@@ -132,11 +129,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   btn1.addEventListener("click", function () {
     if (pw1.type === "password") {
       pw1.type = "text";
-      icon1.src = "book_webshop_2XD/images/visible.png";
+      icon1.src = "<?= APP_URL ?>images/visible.png";
       btn1.setAttribute("aria-label", "Hide password");
     } else {
       pw1.type = "password";
-      icon1.src = "book_webshop_2XD/images/hide.png";
+      icon1.src = "<?= APP_URL ?>images/hide.png";
       btn1.setAttribute("aria-label", "Show password");
     }
   });
@@ -148,11 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   btn2.addEventListener("click", function () {
     if (pw2.type === "password") {
       pw2.type = "text";
-      icon2.src = "book_webshop_2XD/images/visible.png";
+      icon2.src = "<?= APP_URL ?>images/visible.png";
       btn2.setAttribute("aria-label", "Hide password");
     } else {
       pw2.type = "password";
-      icon2.src = "book_webshop_2XD/images/hide.png";
+      icon2.src = "<?= APP_URL ?>images/hide.png";
       btn2.setAttribute("aria-label", "Show password");
     }
   });

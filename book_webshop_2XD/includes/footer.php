@@ -19,14 +19,14 @@
       </p>
 
       <div class="socials">
-        <a href="https://facebook.com/uitsprakenannabel.smeulders" target="_blank">
-          <img src="book_webshop_2XD/images/facebook.png" alt="Facebook">
+        <a href="https://facebook.com/uitsprakenannabel.smeulders" target="_blank" rel="noopener noreferrer">
+          <img src="<?= APP_URL ?>images/facebook.png" alt="Facebook">
         </a>
-        <a href="https://www.instagram.com/smeuldersannabel/" target="_blank">
-          <img src="book_webshop_2XD/images/instagram.png" alt="Instagram">
+        <a href="https://www.instagram.com/smeuldersannabel/" target="_blank" rel="noopener noreferrer">
+          <img src="<?= APP_URL ?>images/instagram.png" alt="Instagram">
         </a>
-        <a href="https://www.tiktok.com/@annabel_happycow" target="_blank">
-          <img src="book_webshop_2XD/images/tiktok.png" alt="TikTok">
+        <a href="https://www.tiktok.com/@annabel_happycow" target="_blank" rel="noopener noreferrer">
+          <img src="<?= APP_URL ?>images/tiktok.png" alt="TikTok">
         </a>
       </div>
     </div>

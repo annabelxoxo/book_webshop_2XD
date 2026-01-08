@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (empty($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("admin/book_create.php"));
   exit;
 }
 
@@ -15,7 +15,6 @@ function h($s){
 }
 
 $error = "";
-
 
 $data = [
   "title" => "",
@@ -56,17 +55,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $data["serie_number"] = trim((string)($_POST["serie_number"] ?? ""));
 
   $postedGenres = $_POST["genres"] ?? [];
-if (!is_array($postedGenres)) $postedGenres = [];
+  if (!is_array($postedGenres)) $postedGenres = [];
 
-$selectedGenres = array_values(
-  array_unique(
-    array_filter(
-      array_map('intval', $postedGenres),
-      fn($x) => $x > 0
+  $selectedGenres = array_values(
+    array_unique(
+      array_filter(
+        array_map('intval', $postedGenres),
+        fn($x) => $x > 0
+      )
     )
-  )
-);
-
+  );
 
   if ($data["title"] === "") {
     $error = "Title is required.";
@@ -81,50 +79,44 @@ $selectedGenres = array_values(
     try {
       $pdo->beginTransaction();
 
-        $coverPath = null;
+      $coverPath = null;
 
-if (!empty($_FILES["cover_image_file"]["name"])) {
-  $f = $_FILES["cover_image_file"];
+      if (!empty($_FILES["cover_image_file"]["name"])) {
+        $f = $_FILES["cover_image_file"];
 
-    if ($f["error"] !== UPLOAD_ERR_OK) {
-    throw new Exception("Upload failed.");
-     }
+        if ($f["error"] !== UPLOAD_ERR_OK) {
+          throw new Exception("Upload failed.");
+        }
 
-    $ext = strtolower(pathinfo($f["name"], PATHINFO_EXTENSION));
-    $allowed = ["jpg","jpeg","png","webp"];
+        $ext = strtolower(pathinfo($f["name"], PATHINFO_EXTENSION));
+        $allowed = ["jpg","jpeg","png","webp"];
 
-    if (!in_array($ext, $allowed, true)) {
-      throw new Exception("Only JPG, PNG or WebP allowed.");
-    }
+        if (!in_array($ext, $allowed, true)) {
+          throw new Exception("Only JPG, PNG or WebP allowed.");
+        }
 
-      $uploadDir = __DIR__ . "/../images/";
-      if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        $uploadDir = __DIR__ . "/../images/";
+        if (!is_dir($uploadDir)) {
+          mkdir($uploadDir, 0777, true);
+        }
+
+        $newName = "book_" . time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
+        $dest = $uploadDir . $newName;
+
+        if (!move_uploaded_file($f["tmp_name"], $dest)) {
+          throw new Exception("Could not save uploaded image.");
+        }
+
+        // ✅ pad zoals gebruikt door de site
+        $coverPath = "images/" . $newName;
       }
 
-      $newName = "book_" . time() . "_" . bin2hex(random_bytes(4)) . "." . $ext;
-      $dest = $uploadDir . $newName;
+      $ins = $pdo->prepare("
+        INSERT INTO book (title, price, cover_image, description, author_id, serie_id, serie_number)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      ");
 
-      if (!move_uploaded_file($f["tmp_name"], $dest)) {
-        throw new Exception("Could not save uploaded image.");
-     }
-        $coverPath = "book_webshop_2XD/images/" . $newName; 
-      }
- 
-
-if ($error !== "") {
-    throw new Exception($error);
-} 
-
-
-
-        $ins = $pdo->prepare("
-         INSERT INTO book (title, price, cover_image, description, author_id, serie_id, serie_number)
-         VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
-
-
-        $ins->execute([
+      $ins->execute([
         $data["title"],
         $price,
         $coverPath,
@@ -132,7 +124,7 @@ if ($error !== "") {
         (int)$data["author_id"],
         ($data["serie_id"] > 0 ? $data["serie_id"] : null),
         ($data["serie_number"] !== "" ? (int)$data["serie_number"] : null),
-        ]);
+      ]);
 
       $bookId = (int)$pdo->lastInsertId();
 
@@ -148,7 +140,7 @@ if ($error !== "") {
 
       $pdo->commit();
 
-      header("Location: /book_webshop_2XD/admin/books.php");
+      header("Location: " . APP_URL . "admin/books.php");
       exit;
 
     } catch (Throwable $e) {
@@ -157,19 +149,18 @@ if ($error !== "") {
     }
   }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Add book - Admin</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container">
@@ -180,7 +171,7 @@ if ($error !== "") {
         <p class="admin-sub">Create a new book and assign genres.</p>
       </div>
 
-      <a class="btn-secondary" href="book_webshop_2XD/admin/books.php">
+      <a class="btn-secondary" href="<?= APP_URL ?>admin/books.php">
         ← Back to books
       </a>
     </section>
@@ -191,7 +182,6 @@ if ($error !== "") {
 
     <form method="post" class="contact-form" enctype="multipart/form-data">
 
-
       <div class="form-group">
         <label>Title *</label>
         <input type="text" name="title" value="<?= h($data["title"]) ?>" required>
@@ -200,19 +190,17 @@ if ($error !== "") {
       <div class="form-group">
         <label>Author *</label>
         <select name="author_id" required>
-      <option value="0">-- choose author --</option>
-
-        <?php foreach ($authors as $a): ?>
-        <option
-        value="<?= (int)$a["id"] ?>"
-        <?= ((int)$data["author_id"] === (int)$a["id"]) ? "selected" : "" ?>
-        >
-        <?= h($a["name"]) ?>
-      </option>
-    <?php endforeach; ?>
-
-  </select>
-</div>
+          <option value="0">-- choose author --</option>
+          <?php foreach ($authors as $a): ?>
+            <option
+              value="<?= (int)$a["id"] ?>"
+              <?= ((int)$data["author_id"] === (int)$a["id"]) ? "selected" : "" ?>
+            >
+              <?= h($a["name"]) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
 
       <div class="form-group">
         <label>Price (€) *</label>
@@ -222,7 +210,7 @@ if ($error !== "") {
       <div class="form-group">
         <label>Cover image (optional)</label>
         <input type="file" name="cover_image_file" accept="image/*">
-        <small >JPG/PNG/WebP recommended.</small>
+        <small>JPG/PNG/WebP recommended.</small>
       </div>
 
       <div class="form-group">
@@ -231,47 +219,47 @@ if ($error !== "") {
       </div>
 
       <div class="form-group">
-  <label>Genres (optional)</label>
+        <label>Genres (optional)</label>
 
-  <?php if (empty($genres)): ?>
-    <p class="admin-empty">No genres found.</p>
-  <?php else: ?>
-    <div class="admin-genres-checkboxes">
-      <?php foreach ($genres as $g): ?>
-        <?php $gid = (int)$g["id"]; ?>
-        <label class="admin-genre-check">
-          <input
-            type="checkbox"
-            name="genres[]"
-            value="<?= $gid ?>"
-            <?= in_array($gid, $selectedGenres, true) ? "checked" : "" ?>
-          >
-          <span><?= h($g["name"]) ?></span>
-        </label>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
-</div>
-        
-     <div class="form-group">
-      <label>Series (optional)</label>
-        <select name="serie_id">
-            <option value="0">-- none --</option>
-            <?php foreach ($series as $s): ?>
-            <option
-                value="<?= (int)$s["id"] ?>"
-                <?= ((string)$data["serie_id"] === (string)$s["id"]) ? "selected" : "" ?>
+        <?php if (empty($genres)): ?>
+          <p class="admin-empty">No genres found.</p>
+        <?php else: ?>
+          <div class="admin-genres-checkboxes">
+            <?php foreach ($genres as $g): ?>
+              <?php $gid = (int)$g["id"]; ?>
+              <label class="admin-genre-check">
+                <input
+                  type="checkbox"
+                  name="genres[]"
+                  value="<?= $gid ?>"
+                  <?= in_array($gid, $selectedGenres, true) ? "checked" : "" ?>
                 >
-                <?= h($s["name"]) ?>
-            </option>
+                <span><?= h($g["name"]) ?></span>
+              </label>
             <?php endforeach; ?>
-        </select>
-    </div>
+          </div>
+        <?php endif; ?>
+      </div>
 
-<div class="form-group">
-  <label>Series number (optional)</label>
-  <input type="number" min="1" name="serie_number" value="<?= h($data["serie_number"]) ?>" placeholder="e.g. 1">
-</div>
+      <div class="form-group">
+        <label>Series (optional)</label>
+        <select name="serie_id">
+          <option value="0">-- none --</option>
+          <?php foreach ($series as $s): ?>
+            <option
+              value="<?= (int)$s["id"] ?>"
+              <?= ((string)$data["serie_id"] === (string)$s["id"]) ? "selected" : "" ?>
+            >
+              <?= h($s["name"]) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Series number (optional)</label>
+        <input type="number" min="1" name="serie_number" value="<?= h($data["serie_number"]) ?>" placeholder="e.g. 1">
+      </div>
 
       <button type="submit" class="btn-primary">
         Create book
@@ -282,6 +270,6 @@ if ($error !== "") {
   </div>
 </main>
 
-<?php include __DIR__ . "/../includes/footer.php"; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

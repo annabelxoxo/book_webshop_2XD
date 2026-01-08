@@ -4,66 +4,72 @@ require __DIR__ . "/../includes/config.php";
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
-if(!isset($_SESSION["user_id"])){
-    header("Location: /book_webshop_2XD/login.php");
-    exit;
+
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
+function asset_url(string $path): string {
+  $path = trim($path);
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
+
+if (!isset($_SESSION["user_id"])) {
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("classes/cart.php"));
+  exit;
 }
 $userId = (int)$_SESSION["user_id"];
-
 
 $success = "";
 $error = "";
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $action = $_POST['action'] ?? '';
+  $action = (string)($_POST['action'] ?? '');
   $id = (int)($_POST['id'] ?? 0);
 
-try {
+  try {
 
-  if ($action === 'remove' && $id > 0) {
-    $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
-    $stmt->execute([$userId, $id]);
-    $success = "Book removed from cart.";
-  }
+    if ($action === 'remove' && $id > 0) {
+      $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
+      $stmt->execute([$userId, $id]);
+      $success = "Book removed from cart.";
+    }
 
-  if ($action === 'clear') {
-    $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ?");
-    $stmt->execute([$userId]);
-    $success = "Cart cleared.";
-  }
+    if ($action === 'clear') {
+      $stmt = $pdo->prepare("DELETE FROM cart WHERE user_id = ?");
+      $stmt->execute([$userId]);
+      $success = "Cart cleared.";
+    }
 
-  if ($action === 'update_qty' && $id > 0) {
-    $qty = (int)($_POST['qty'] ?? 1);
-    if ($qty < 1) $qty = 1;
+    if ($action === 'update_qty' && $id > 0) {
+      $qty = (int)($_POST['qty'] ?? 1);
+      if ($qty < 1) $qty = 1;
 
-    
-  $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE user_id = ? AND book_id = ? LIMIT 1");
-    $stmt->execute([$qty, $userId, $id]);
-    $success = "Quantity updated.";
-  }
+      $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE user_id = ? AND book_id = ? LIMIT 1");
+      $stmt->execute([$qty, $userId, $id]);
+      $success = "Quantity updated.";
+    }
 
-  if ($action === 'move_to_wishlist' && $id > 0) {
-    $pdo->beginTransaction();
-    $del = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
-    $del->execute([$userId, $id]);
+    if ($action === 'move_to_wishlist' && $id > 0) {
+      $pdo->beginTransaction();
 
-    $ins = $pdo->prepare("
-      INSERT INTO wishlist (user_id, book_id, added_at)
-      VALUES (?, ?, NOW())
-      ON DUPLICATE KEY UPDATE added_at = NOW()
-    ");
+      $del = $pdo->prepare("DELETE FROM cart WHERE user_id = ? AND book_id = ? LIMIT 1");
+      $del->execute([$userId, $id]);
 
-    $ins->execute([$userId, $id]);
+      $ins = $pdo->prepare("
+        INSERT INTO wishlist (user_id, book_id, added_at)
+        VALUES (?, ?, NOW())
+        ON DUPLICATE KEY UPDATE added_at = NOW()
+      ");
+      $ins->execute([$userId, $id]);
 
-    $pdo->commit();
+      $pdo->commit();
       $success = "Moved to wishlist.";
     }
 
-} catch (Throwable $e) {
+  } catch (Throwable $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
     $error = "Something went wrong: " . $e->getMessage();
-  
   }
 }
 
@@ -80,28 +86,25 @@ try {
     JOIN book b ON b.id = c.book_id
     JOIN author a ON a.id = b.author_id
     WHERE c.user_id = ?
-    ORDER BY c.added_at DESC, c.book_id DESC");
+    ORDER BY c.added_at DESC, c.book_id DESC
+  ");
   $stmt->execute([$userId]);
   $items = $stmt->fetchAll();
 } catch (Throwable $e) {
   $error = "Could not load cart items: " . $e->getMessage();
 }
 
-
 $totalEuro = 0.0;
 $totalUnits = 0;
 $totalQty = 0;
 
-
 foreach ($items as $it) {
-
   $qty = (int)$it['quantity'];
   $price = (float)$it['price'];
 
   $totalQty += $qty;
   $totalEuro += $price * $qty;
   $totalUnits += (int)round($price * 10) * $qty;
-
 }
 ?>
 <!DOCTYPE html>
@@ -110,12 +113,12 @@ foreach ($items as $it) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cart - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include __DIR__ . '/../includes/header.php'; ?>
+<?php require_once __DIR__ . '/../includes/header.php'; ?>
 
 <main>
   <div class="container">
@@ -135,17 +138,17 @@ foreach ($items as $it) {
     </section>
 
     <?php if ($error): ?>
-      <p class="error"><?= htmlspecialchars($error) ?></p>
+      <p class="error"><?= h($error) ?></p>
     <?php endif; ?>
 
     <?php if ($success): ?>
-      <p class="success"><?= htmlspecialchars($success) ?></p>
+      <p class="success"><?= h($success) ?></p>
     <?php endif; ?>
 
     <?php if (empty($items)): ?>
       <div class="cart-empty">
         <p>Your cart is empty.</p>
-        <a class="btn-primary" href="book_webshop_2XD/catalog.php">Browse catalog</a>
+        <a class="btn-primary" href="<?= APP_URL ?>catalog.php">Browse catalog</a>
       </div>
     <?php else: ?>
 
@@ -160,16 +163,20 @@ foreach ($items as $it) {
               $unitsEach = (int)round(((float)$b['price']) * 10);
               $lineEuro = ((float)$b['price']) * $qty;
               $lineUnits = $unitsEach * $qty;
+
+              $coverUrl = asset_url((string)($b['cover_image'] ?? ''));
             ?>
             <article class="cart-card">
-              <a class="cart-card-link" href="book_webshop_2XD/product.php?id=<?= $id ?>">
+              <a class="cart-card-link" href="<?= APP_URL ?>product.php?id=<?= $id ?>">
                 <div class="cart-img">
-                  <img src="<?= htmlspecialchars($b['cover_image']) ?>" alt="<?= htmlspecialchars($b['title']) ?>">
+                  <?php if ($coverUrl): ?>
+                    <img src="<?= h($coverUrl) ?>" alt="<?= h($b['title']) ?>">
+                  <?php endif; ?>
                 </div>
 
                 <div class="cart-info">
-                  <h3><?= htmlspecialchars(ucwords($b['title'])) ?></h3>
-                  <p class="cart-author"><?= htmlspecialchars($b['author_name']) ?></p>
+                  <h3><?= h(ucwords((string)$b['title'])) ?></h3>
+                  <p class="cart-author"><?= h($b['author_name']) ?></p>
                   <p class="cart-meta">Paperback | English</p>
 
                   <p class="cart-price">
@@ -232,11 +239,11 @@ foreach ($items as $it) {
 
           <p class="cart-rate">1€ = 10 units</p>
 
-          <a class="btn-primary cart-checkout" href="book_webshop_2XD/checkout.php">
+          <a class="btn-primary cart-checkout" href="<?= APP_URL ?>checkout.php">
             Checkout
           </a>
 
-          <a class="btn-secondary cart-back" href="catalog.php">← Continue shopping</a>
+          <a class="btn-secondary cart-back" href="<?= APP_URL ?>catalog.php">← Continue shopping</a>
         </aside>
 
       </div>
@@ -245,7 +252,6 @@ foreach ($items as $it) {
   </div>
 </main>
 
-<?php include __DIR__ . '/../includes/footer.php'; ?>
-
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
 </body>
 </html>

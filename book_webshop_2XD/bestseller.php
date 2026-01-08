@@ -5,6 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
+function asset_url(string $path): string {
+  $path = trim($path);
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
 
 $stmt = $pdo->query("
   SELECT
@@ -23,9 +31,7 @@ $stmt = $pdo->query("
 
 $rows = $stmt->fetchAll();
 
-
 $byGenre = [];
-
 foreach ($rows as $book) {
   $genreName = $book['genre'] ?: 'Other';
   $byGenre[$genreName][] = $book;
@@ -41,12 +47,12 @@ foreach ($byGenre as $g => $list) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bestsellers - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 
 <body>
-<?php include 'includes/header.php'; ?>
+<?php require_once __DIR__ . '/includes/header.php'; ?>
 
 <main>
   <section class="catalog-hero">
@@ -62,28 +68,33 @@ foreach ($byGenre as $g => $list) {
     <?php foreach ($byGenre as $genreName => $list): ?>
       <section class="bestseller-genre">
         <div class="bestseller-genre-head">
-          <h3><?= htmlspecialchars($genreName) ?></h3>
+          <h3><?= h($genreName) ?></h3>
           <span class="units-note">1€ = 10 units</span>
         </div>
 
         <div class="bestseller-row">
           <?php $rank = 1; ?>
           <?php foreach ($list as $book): ?>
-            <?php $units = (int)round(((float)$book['price']) * 10); ?>
+            <?php
+              $units = (int)round(((float)$book['price']) * 10);
+              $coverUrl = asset_url((string)($book['cover_image'] ?? ''));
+            ?>
 
             <article class="bestseller-item">
               <div class="bestseller-rank"><?= $rank++ ?></div>
 
-              <a class="bestseller-cover" href="book_webshop_2XD/product.php?id=<?= (int)$book['id'] ?>">
-                <img
-                  src="<?= htmlspecialchars($book['cover_image']) ?>"
-                  alt="<?= htmlspecialchars($book['title']) ?>"
-                />
+              <a class="bestseller-cover" href="<?= APP_URL ?>product.php?id=<?= (int)$book['id'] ?>">
+                <?php if ($coverUrl): ?>
+                  <img
+                    src="<?= h($coverUrl) ?>"
+                    alt="<?= h($book['title']) ?>"
+                  />
+                <?php endif; ?>
               </a>
 
               <div class="bestseller-meta">
-                <h4 class="bestseller-title"><?= htmlspecialchars($book['title']) ?></h4>
-                <p class="bestseller-author"><?= htmlspecialchars($book['author']) ?></p>
+                <h4 class="bestseller-title"><?= h($book['title']) ?></h4>
+                <p class="bestseller-author"><?= h($book['author']) ?></p>
 
                 <p class="bestseller-price">
                   €<?= number_format((float)$book['price'], 2, ',', '.') ?>
@@ -98,6 +109,6 @@ foreach ($byGenre as $g => $list) {
   </div>
 </main>
 
-<?php include 'includes/footer.php'; ?>
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>

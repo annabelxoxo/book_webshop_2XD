@@ -5,9 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-
 if (empty($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("admin/orders.php"));
   exit;
 }
 
@@ -47,12 +46,12 @@ try {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orders - Admin</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css" />
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css" />
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container">
@@ -62,7 +61,7 @@ try {
         <h2>Orders</h2>
         <p class="admin-sub">Latest 50 orders</p>
       </div>
-      <a class="btn-secondary" href="book_webshop_2XD/admin/dashboard.php">← Back to dashboard</a>
+      <a class="btn-secondary" href="<?= APP_URL ?>admin/dashboard.php">← Back to dashboard</a>
     </section>
 
     <?php if ($error): ?>
@@ -70,7 +69,7 @@ try {
     <?php endif; ?>
 
     <section class="profile-box">
-      <h3 >Order list</h3>
+      <h3>Order list</h3>
 
       <?php if (empty($orders)): ?>
         <p>No orders yet.</p>
@@ -88,27 +87,31 @@ try {
             </thead>
             <tbody>
               <?php foreach ($orders as $o): ?>
+                <?php $unitsPaid = (int)round(((float)($o["grand_total"] ?? 0)) * 10); ?>
                 <tr>
                   <td>
                     <strong><?= h($o["user_name"]) ?></strong><br>
                     <small style="color:#777;"><?= h($o["user_email"]) ?></small>
                   </td>
                   <td>
-                     <span class="admin-orders-status <?= h($o["status"]) ?>">
-                      <?= h($o["status"]) ?>
+                    <span class="admin-orders-status <?= h($o["status"] ?? "") ?>">
+                      <?= h($o["status"] ?? "") ?>
                     </span>
                   </td>
                   <td>
-                      <strong><?= (int)$o["grand_total"] ?> units</strong>
+                    <strong><?= $unitsPaid ?> units</strong><br>
+                    <small style="color:#777;">
+                      €<?= number_format((float)($o["grand_total"] ?? 0), 2, ",", ".") ?>
+                    </small>
                   </td>
                   <td>
-                    <?= h($o["created_at"]) ?>
+                    <?= h($o["created_at"] ?? "") ?>
                   </td>
-                 <td class="admin-orders-actions">
-                    <a class="btn-secondary" href="book_webshop_2XD/admin/order_view.php?id=<?= (int)$o["id"] ?>">
-                     View
+                  <td class="admin-orders-actions">
+                    <a class="btn-secondary" href="<?= APP_URL ?>admin/order_view.php?id=<?= (int)$o["id"] ?>">
+                      View
                     </a>
-                 </td>
+                  </td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -120,7 +123,6 @@ try {
   </div>
 </main>
 
-<?php include __DIR__ . "/../includes/footer.php"; ?>
-
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

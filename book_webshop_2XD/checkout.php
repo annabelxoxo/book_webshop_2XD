@@ -4,7 +4,7 @@ require __DIR__ . "/includes/config.php";
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!isset($_SESSION["user_id"])) {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("checkout.php"));
   exit;
 }
 
@@ -12,9 +12,17 @@ $userId = (int)$_SESSION["user_id"];
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
 
+// maakt van cover_image een bruikbare URL:
+// - begint met http://, https:// of /  => laten zoals het is
+// - anders => APP_URL ervoor zetten
+function asset_url(string $path): string {
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
+
 $error = "";
 $success = "";
-
 
 $items = [];
 try {
@@ -37,7 +45,6 @@ try {
 } catch (Throwable $e) {
   $error = "Could not load cart: " . $e->getMessage();
 }
-
 
 $totalQty = 0;
 $subtotal = 0.0;
@@ -68,7 +75,6 @@ try {
   $error = "Could not load user units: " . $e->getMessage();
 }
 
-
 $addresses = [];
 try {
   $stmt = $pdo->prepare("
@@ -82,7 +88,6 @@ try {
 } catch (Throwable $e) {
   $error = "Could not load addresses: " . $e->getMessage();
 }
-
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place_order") {
 
@@ -101,7 +106,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
     try {
       $pdo->beginTransaction();
 
-
       $chkAddr = $pdo->prepare("SELECT id FROM address WHERE id = ? AND user_id = ? AND type='shipping' LIMIT 1");
       $chkAddr->execute([$shippingAddressId, $userId]);
       if (!$chkAddr->fetchColumn()) {
@@ -119,7 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
         throw new Exception("Not enough units (race condition).");
       }
 
-  
       $insOrder = $pdo->prepare("
         INSERT INTO `order`
           (user_id, status, currency, subtotal, shipping_cost, tax_amount, discount_total, grand_total, created_at)
@@ -127,8 +130,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
           (?, ?, ?, ?, ?, ?, ?, ?, NOW())
       ");
 
-      $status = "paid";      
-      $currency = "UNITS";   
+      $status = "paid";
+      $currency = "UNITS";
 
       $insOrder->execute([
         $userId,
@@ -162,7 +165,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
 
       $pdo->commit();
 
-      header("Location: /book_webshop_2XD/checkout_success.php?id=" . $orderId);
+      header("Location: " . APP_URL . "checkout_success.php?id=" . $orderId);
       exit;
 
     } catch (Throwable $e) {
@@ -178,12 +181,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Checkout - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css">
 </head>
 <body>
 
-<?php include __DIR__ . "/includes/header.php"; ?>
+<?php require_once __DIR__ . "/includes/header.php"; ?>
 
 <main>
   <div class="container">
@@ -193,7 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
         <h2>Checkout</h2>
         <p class="cart-sub">Pay with units and place your order.</p>
       </div>
-      <a class="btn-secondary" href="book_webshop_2XD/classes/cart.php">← Back to cart</a>
+      <a class="btn-secondary" href="<?= APP_URL ?>classes/cart.php">← Back to cart</a>
     </section>
 
     <?php if ($error): ?>
@@ -203,7 +206,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
     <?php if (empty($items)): ?>
       <div class="cart-empty">
         <p>Your cart is empty.</p>
-        <a class="btn-primary" href="book_webshop_2XD/catalog.php">Browse catalog</a>
+        <a class="btn-primary" href="<?= APP_URL ?>catalog.php">Browse catalog</a>
       </div>
     <?php else: ?>
 
@@ -214,14 +217,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
             <?php
               $qty = (int)$it["quantity"];
               $price = (float)$it["price"];
-              $line = $price * $qty;
               $unitsEach = (int)round($price * 10);
-              $unitsLine = $unitsEach * $qty;
+
+              $cover = (string)($it["cover_image"] ?? "");
+              $coverUrl = asset_url($cover);
             ?>
             <article class="cart-card">
-              <a class="cart-card-link" href="book_webshop_2XD/product.php?id=<?= (int)$it["book_id"] ?>">
+              <a class="cart-card-link" href="<?= APP_URL ?>product.php?id=<?= (int)$it["book_id"] ?>">
                 <div class="cart-img">
-                  <img src="<?= h($it["cover_image"]) ?>" alt="<?= h($it["title"]) ?>">
+                  <?php if ($coverUrl): ?>
+                    <img src="<?= h($coverUrl) ?>" alt="<?= h($it["title"]) ?>">
+                  <?php endif; ?>
                 </div>
                 <div class="cart-info">
                   <h3><?= h(ucwords($it["title"])) ?></h3>
@@ -232,8 +238,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
                     €<?= number_format($price, 2, ",", ".") ?>
                     <span>(<?= $unitsEach ?> units)</span>
                   </p>
-
-                  
                 </div>
               </a>
             </article>
@@ -264,34 +268,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
 
           <?php if (empty($addresses)): ?>
             <p>No shipping address found.</p>
-            <a class="btn-secondary" href="book_webshop_2XD/address_form.php">Add shipping address</a>
+            <a class="btn-secondary" href="<?= APP_URL ?>address_form.php">Add shipping address</a>
           <?php else: ?>
-            
-            <form method="post">
-                <input type="hidden" name="action" value="place_order">
 
-                <label>Choose address</label>
-                 <select name="shipping_address_id" required>
-                    <option value="">-- choose --</option>
-                    <?php foreach ($addresses as $a): ?>
-                    <option value="<?= (int)$a["id"] ?>">
+            <form method="post">
+              <input type="hidden" name="action" value="place_order">
+
+              <label>Choose address</label>
+              <select name="shipping_address_id" required>
+                <option value="">-- choose --</option>
+                <?php foreach ($addresses as $a): ?>
+                  <option value="<?= (int)$a["id"] ?>">
                     <?= h($a["full_name"]) ?> —
                     <?= h($a["street"]) ?> <?= h($a["house_number"]) ?>
                     <?= h($a["house_number_addition"]) ?>,
                     <?= h($a["postal_code"]) ?> <?= h($a["city"]) ?>
-                    </option>
+                  </option>
                 <?php endforeach; ?>
-                </select>
+              </select>
 
-                <button class="btn-primary checkout-pay" type="submit">
+              <button class="btn-primary checkout-pay" type="submit">
                 Pay with units
-                </button>
+              </button>
 
-                <p class="checkout-units-note">
+              <p class="checkout-units-note">
                 1€ = 10 units (units-only checkout)
-                </p>
+              </p>
             </form>
-
 
           <?php endif; ?>
 
@@ -304,6 +307,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "place
   </div>
 </main>
 
-<?php include __DIR__ . "/includes/footer.php"; ?>
+<?php require_once __DIR__ . "/includes/footer.php"; ?>
 </body>
 </html>

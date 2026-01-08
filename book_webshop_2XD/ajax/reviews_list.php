@@ -4,12 +4,14 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 header("Content-Type: application/json; charset=UTF-8");
 
-$bookId = (int)($_GET["book_id"] ?? 0);
-if ($bookId < 1) {
-  http_response_code(400);
-  echo json_encode(["ok" => false, "error" => "Invalid book_id"]);
+function out($ok, $arr = [], $code = 200){
+  http_response_code($code);
+  echo json_encode(array_merge(["ok"=>$ok], $arr), JSON_UNESCAPED_UNICODE);
   exit;
 }
+
+$bookId = (int)($_GET["book_id"] ?? 0);
+if ($bookId < 1) out(false, ["error" => "Invalid book_id"], 400);
 
 try {
   $stmt = $pdo->prepare("
@@ -22,8 +24,7 @@ try {
   ");
   $stmt->execute([$bookId]);
 
-  echo json_encode(["ok" => true, "reviews" => $stmt->fetchAll()]);
+  out(true, ["reviews" => $stmt->fetchAll()]);
 } catch (Throwable $e) {
-  http_response_code(500);
-  echo json_encode(["ok" => false, "error" => "Could not load reviews."]);
+  out(false, ["error" => "Could not load reviews."], 500);
 }

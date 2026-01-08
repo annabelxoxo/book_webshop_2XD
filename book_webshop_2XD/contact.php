@@ -1,86 +1,60 @@
 <?php
-require __DIR__ . "/includes/config.php";
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
+$isLoggedIn = !empty($_SESSION['user_id']);
+
+// ✅ dynamisch pad naar project-root (werkt in /, /admin, /classes, ...)
+$root = rtrim(dirname($_SERVER["SCRIPT_NAME"]), "/\\");
+$root = preg_replace('~/(admin|classes|ajax)(/.*)?$~', '', $root);
+$root = $root . "/";
+
+// links
+$profileHref  = $isLoggedIn ? $root . 'profile.php'       : $root . 'login.php';
+$wishlistHref = $isLoggedIn ? $root . 'wishlist.php'      : $root . 'login.php';
+$cartHref     = $isLoggedIn ? $root . 'classes/cart.php'  : $root . 'login.php';
 ?>
+<header class="main-header">
+  <div class="container header-inner">
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us - Book Webshop</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css">
-</head>
+    <div class="header-logo">
+      <a href="<?= $root ?>index.php">Books.</a>
+    </div>
 
-<body>
-
-<?php include 'includes/header.php'; ?>
-
-<main>
-  <div class="container">
-
-<section class="contact-page">
-  <h2>Contact Us</h2>
-  <p class="contact-intro">
-    Have a question or need help? Reach out to us or send a message.
-  </p>
-
-  <div class="contact-layout">
-
-    <form class="contact-form" method="post">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" required>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
-      </div>
-
-      <div class="form-group">
-        <label for="message">Message</label>
-        <textarea id="message" name="message" rows="5" required></textarea>
-      </div>
-
-      <button type="submit" class="btn-primary">Send message</button>
+    <form class="header-search" action="<?= $root ?>catalog.php" method="get">
+      <input type="text" name="q" placeholder="Search by name, title or author">
     </form>
 
-    <div class="contact-info">
-      <h3>or want to talk directly to us on the phone</h3>
+    <div class="header-right">
 
+      <nav class="header-nav">
+        <a href="<?= $root ?>index.php">Home</a>
 
+        <?php if (!empty($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+          <a href="<?= $root ?>admin/dashboard.php">Dashboard</a>
+        <?php endif; ?>
 
-      <p>
-        📞 <a href="tel:+32483450862">
-          +32 483 45 08 62
-        </a>
-      </p>
+        <a href="<?= $root ?>catalog.php">Catalog</a>
+        <a href="<?= $root ?>bestseller.php">Bestseller</a>
+        <a href="<?= $root ?>contact.php">Contact</a>
+      </nav>
 
-      <div class="contact-socials">
-        <h4>Follow me on social media</h4>
-        <a href="https://facebook.com/uitsprakenannabel.smeulders" target="_blank">
-          <img src="book_webshop_2XD/images/facebook.png" alt="Facebook">
-        </a>
-
-        <a href="https://www.instagram.com/smeuldersannabel/" target="_blank">
-          <img src="book_webshop_2XD/images/instagram.png" alt="Instagram">
+      <div class="header-icons">
+        <a href="<?= htmlspecialchars($cartHref) ?>" class="icon-btn">
+          <img src="<?= $root ?>images/shopping cart icon.webp" alt="Cart">
         </a>
 
-        <a href="https://www.tiktok.com/@annabel_happycow" target="_blank">
-          <img src="book_webshop_2XD/images/tiktok.png" alt="Tiktok">
+        <a href="<?= htmlspecialchars($wishlistHref) ?>" class="icon-btn">
+          <img src="<?= $root ?>images/wishlist icon.png" alt="Wishlist">
+        </a>
+
+        <a href="<?= htmlspecialchars($profileHref) ?>" class="icon-btn">
+          <img src="<?= $root ?>images/profile icon.png" alt="Profile">
         </a>
       </div>
+
     </div>
 
   </div>
-</section>
-
-
-  </div>
-</main>
-
-<?php include 'includes/footer.php'; ?>
-
-</body>
-</html>
+</header>

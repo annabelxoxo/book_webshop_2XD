@@ -4,15 +4,22 @@ require __DIR__ . "/../includes/config.php";
 if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (empty($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("admin/order_view.php?id=" . (int)($_GET["id"] ?? 0)));
   exit;
 }
 
 function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
 
+function asset_url(string $path): string {
+  $path = trim($path);
+  if ($path === '') return '';
+  if (preg_match('~^(https?://|/)~i', $path)) return $path;
+  return APP_URL . ltrim($path, '/');
+}
+
 $orderId = (int)($_GET["id"] ?? 0);
 if ($orderId < 1) {
-  header("Location: /book_webshop_2XD/admin/orders.php");
+  header("Location: " . APP_URL . "admin/orders.php");
   exit;
 }
 
@@ -21,7 +28,6 @@ $order = null;
 $items = [];
 
 try {
-
   $stmt = $pdo->prepare("
     SELECT
       o.*,
@@ -60,6 +66,12 @@ try {
 } catch (Throwable $e) {
   $error = "Could not load order: " . $e->getMessage();
 }
+
+// units helpers (1€ = 10 units)
+// (order bestaat hier sowieso door de die() hierboven, maar we houden het veilig)
+$subtotalUnits = (int)round(((float)($order["subtotal"] ?? 0)) * 10);
+$discountUnits = (int)round(((float)($order["discount_total"] ?? 0)) * 10);
+$grandUnits    = (int)round(((float)($order["grand_total"] ?? 0)) * 10);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -67,12 +79,12 @@ try {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order #<?= (int)$orderId ?> - Admin</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css" />
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css" />
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container admin-order-view">
@@ -81,75 +93,77 @@ try {
       <div>
         <h2>Order #<?= (int)$order["id"] ?></h2>
         <p class="admin-sub">
-          <?= h($order["user_email"]) ?> · <?= h($order["created_at"]) ?>
+          <?= h($order["user_email"] ?? "") ?> · <?= h($order["created_at"] ?? "") ?>
         </p>
       </div>
 
-      <a class="btn-secondary" href="book_webshop_2XD/admin/orders.php">
-        ← Back to orders
-      </a>
+      <a class="btn-secondary" href="<?= APP_URL ?>admin/orders.php">← Back to orders</a>
     </section>
+
+    <?php if ($error): ?>
+      <p class="error"><?= h($error) ?></p>
+    <?php endif; ?>
 
     <div class="admin-order-layout">
 
       <!-- LEFT -->
       <div>
-
         <div class="admin-order-card">
           <h3>Order summary</h3>
 
           <div class="admin-order-row">
             <span>Status</span>
-            <span class="admin-order-status"><?= h($order["status"]) ?></span>
+            <span class="admin-order-status"><?= h($order["status"] ?? "") ?></span>
           </div>
 
           <div class="admin-order-row">
             <span>Subtotal</span>
-            <strong><?= (int)$order["subtotal"] ?> units</strong>
+            <strong><?= $subtotalUnits ?> units</strong>
           </div>
 
           <div class="admin-order-row">
             <span>Discount</span>
-            <strong><?= (int)$order["discount_total"] ?> units</strong>
+            <strong><?= $discountUnits ?> units</strong>
           </div>
 
           <div class="admin-order-row admin-order-total-final">
             <span>Total</span>
-            <strong><?= (int)$order["grand_total"] ?> units</strong>
+            <strong><?= $grandUnits ?> units</strong>
           </div>
         </div>
-
       </div>
 
       <!-- RIGHT -->
       <div>
-
         <div class="admin-order-card">
           <h3>Items</h3>
 
           <div class="admin-order-items">
-
             <?php foreach ($items as $it): ?>
+              <?php
+                $unitsEach = (int)round(((float)($it["price"] ?? 0)) * 10);
+                $coverUrl = asset_url((string)($it["cover_image"] ?? ""));
+              ?>
               <div class="admin-order-item">
 
-                <img src="<?= h($it["cover_image"]) ?>" alt="">
+                <?php if ($coverUrl): ?>
+                  <img src="<?= h($coverUrl) ?>" alt="">
+                <?php endif; ?>
 
                 <div class="admin-order-item-info">
-                  <h4><?= h($it["title"]) ?></h4>
-                  <p><?= h($it["author_name"]) ?></p>
+                  <h4><?= h($it["title"] ?? "") ?></h4>
+                  <p><?= h($it["author_name"] ?? "") ?></p>
                 </div>
 
                 <div class="admin-order-item-meta">
-                  <strong><?= (int)round($it["price"] * 10) ?> units</strong>
-                  Qty: <?= (int)$it["quantity"] ?>
+                  <strong><?= $unitsEach ?> units</strong>
+                  Qty: <?= (int)($it["quantity"] ?? 0) ?>
                 </div>
 
               </div>
             <?php endforeach; ?>
-
           </div>
         </div>
-
       </div>
 
     </div>
@@ -157,8 +171,6 @@ try {
   </div>
 </main>
 
-
-
-<?php include __DIR__ . "/../includes/footer.php"; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

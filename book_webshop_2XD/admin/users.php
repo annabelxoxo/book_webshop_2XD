@@ -5,9 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
-
 if (empty($_SESSION["role"]) || $_SESSION["role"] !== "admin") {
-  header("Location: /book_webshop_2XD/login.php");
+  header("Location: " . APP_URL . "login.php?redirect=" . urlencode("admin/users.php"));
   exit;
 }
 
@@ -15,7 +14,6 @@ function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
 
 $success = "";
 $error = "";
-
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $action = $_POST["action"] ?? "";
@@ -53,7 +51,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $error = "You cannot delete your own account.";
     } else {
       try {
-        
         $stmt = $pdo->prepare("DELETE FROM user WHERE id = ? LIMIT 1");
         $stmt->execute([$id]);
         $success = $stmt->rowCount() ? "User deleted." : "User not found.";
@@ -64,9 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   }
 }
 
-
 $q = trim((string)($_GET["q"] ?? ""));
-$roleFilter = trim((string)($_GET["role"] ?? "")); 
+$roleFilter = trim((string)($_GET["role"] ?? ""));
 
 $where = [];
 $params = [];
@@ -84,10 +80,8 @@ if (in_array($roleFilter, ["user", "admin"], true)) {
 
 $whereSql = $where ? ("WHERE " . implode(" AND ", $where)) : "";
 
-
 $users = [];
 try {
-
   $stmt = $pdo->prepare("
     SELECT
       u.id,
@@ -112,12 +106,12 @@ try {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manage Users - Admin</title>
-  <base href="/book_webshop_2XD/">
-  <link rel="stylesheet" href="book_webshop_2XD/css/styles.css" />
+
+  <link rel="stylesheet" href="<?= APP_URL ?>css/styles.css" />
 </head>
 <body>
 
-<?php include __DIR__ . "/../includes/header.php"; ?>
+<?php require_once __DIR__ . "/../includes/header.php"; ?>
 
 <main>
   <div class="container admin-shell">
@@ -129,7 +123,7 @@ try {
       </div>
 
       <div class="admin-actions">
-        <a class="btn-secondary" href="book_webshop_2XD/admin/dashboard.php">← Back to dashboard</a>
+        <a class="btn-secondary" href="<?= APP_URL ?>admin/dashboard.php">← Back to dashboard</a>
       </div>
     </section>
 
@@ -161,18 +155,18 @@ try {
 
         <div class="control-btns">
           <button class="btn-primary" type="submit">Apply</button>
-          <a class="btn-secondary" href="book_webshop_2XD/admin/users.php">Reset</a>
+          <a class="btn-secondary" href="<?= APP_URL ?>admin/users.php">Reset</a>
         </div>
       </form>
     </section>
 
     <section class="admin-users-card">
-      <h3 >Users (<?= count($users) ?>)</h3>
+      <h3>Users (<?= count($users) ?>)</h3>
 
       <?php if (empty($users)): ?>
-        <p >No users found.</p>
+        <p>No users found.</p>
       <?php else: ?>
-        <div >
+        <div>
           <table class="admin-users-table">
             <thead>
               <tr>
@@ -242,6 +236,6 @@ try {
   </div>
 </main>
 
-<?php include __DIR__ . "/../includes/footer.php"; ?>
+<?php require_once __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>
