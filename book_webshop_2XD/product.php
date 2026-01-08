@@ -65,19 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $success = "Added to cart!";
   }
 
-  if ($action === 'add_to_wishlist') {
-
-    $stmt = $pdo->prepare("
+if ($action === 'add_to_wishlist') {
+  $stmt = $pdo->prepare("
     INSERT INTO wishlist (user_id, book_id, added_at)
     VALUES (?, ?, NOW())
     ON DUPLICATE KEY UPDATE added_at = NOW()
-    ");
-    $stmt->execute([$userId, $id]);
- 
-      $success = "Added to wishlist!";
-  
-      $success = "This book is already in your wishlist.";
-    }
+  ");
+  $stmt->execute([$userId, $id]);
+
+  $success = ($stmt->rowCount() === 1)
+    ? "Added to wishlist!"
+    : "This book is already in your wishlist.";
+}
 
   } catch (Throwable $e) {
     $error = "Something went wrong: " . $e->getMessage();
@@ -95,6 +94,53 @@ $recStmt = $pdo->prepare("
 ");
 $recStmt->execute([$id, (int)$book['author_id']]);
 $recs = $recStmt->fetchAll();
+
+function h($s){ return htmlspecialchars((string)$s, ENT_QUOTES, "UTF-8"); }
+
+
+$reviews = [];
+try {
+$stmt = $pdo->prepare("
+  SELECT r.user_id, r.rating, r.comment, r.created_at, u.name AS user_name
+  FROM review r
+  JOIN user u ON u.id = r.user_id
+  WHERE r.book_id = ?
+  ORDER BY r.created_at DESC
+");
+$stmt->execute([$id]);
+$reviews = $stmt->fetchAll();
+} catch (Throwable $e) {
+  $reviews = [];
+}
+
+$hasBought = false;
+$myReview = null;
+
+if (!empty($_SESSION["user_id"])) {
+  $userId = (int)$_SESSION["user_id"];
+
+  $stmt = $pdo->prepare("
+    SELECT 1
+    FROM `order` o
+    JOIN order_book ob ON ob.order_id = o.id
+    WHERE o.user_id = ? AND ob.book_id = ?
+      AND (o.status = 'paid' OR o.status = 'completed')
+    LIMIT 1
+  ");
+  $stmt->execute([$userId, $id]);
+  $hasBought = (bool)$stmt->fetchColumn();
+
+  $stmt = $pdo->prepare("
+    SELECT rating, comment
+    FROM review
+    WHERE user_id = ? AND book_id = ?
+    LIMIT 1
+  ");
+  $stmt->execute([$userId, $id]);
+  $myReview = $stmt->fetch();
+}
+
+
 ?>
 
 <!DOCTYPE html>
@@ -178,7 +224,7 @@ $recs = $recStmt->fetchAll();
             </form>
           </div>
         </div>
-
+        
       </div>
     </section>
 
@@ -210,9 +256,143 @@ $recs = $recStmt->fetchAll();
       </div>
     </section>
 
+    <section class="reviews-shell" id="reviews">
+  <div class="reviews-head">
+    <div>
+      <h2>Reviews</h2>
+      <p>What other readers think.</p>
+    </div>
+  </div>
+
+  <div id="reviewsList" class="reviews-list">
+    <?php if (empty($reviews)): ?>
+      <p class="reviews-empty">No reviews yet.</p>
+    <?php else: ?>
+      <?php foreach ($reviews as $r): ?>
+        <article class="review-card" data-user-id="<?= (int)$r["user_id"] ?>">
+          <div class="review-top">
+            <strong><?= h($r["user_name"]) ?></strong>
+            <span class="review-rating"><?= (int)$r["rating"] ?>/5</span>
+          </div>
+          <p class="review-comment"><?= nl2br(h($r["comment"])) ?></p>
+          <small class="review-date"><?= h($r["created_at"]) ?></small>
+        </article>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+
+  <?php if (empty($_SESSION["user_id"])): ?>
+    <p class="reviews-note">Log in to leave a review.</p>
+
+  <?php elseif (!$hasBought): ?>
+    <p class="reviews-note">You can only review this book after purchasing it.</p>
+
+  <?php else: ?>
+    <div class="review-form-card">
+      <h3><?= $myReview ? "Update your review" : "Add your review" ?></h3>
+
+      <form id="reviewForm">
+        <input type="hidden" name="book_id" value="<?= (int)$id ?>">
+
+        <label>Rating</label>
+        <select name="rating" required>
+          <?php for ($i=5; $i>=1; $i--): ?>
+            <option value="<?= $i ?>" <?= ($myReview && (int)$myReview["rating"] === $i) ? "selected" : "" ?>>
+              <?= $i ?>
+            </option>
+          <?php endfor; ?>
+        </select>
+
+        <label>Comment</label>
+        <textarea name="comment" rows="4" required><?= $myReview ? h($myReview["comment"]) : "" ?></textarea>
+
+        <button type="submit" class="btn-primary">Save review</button>
+        <p id="reviewMsg" class="reviews-msg" style="display:none;"></p>
+      </form>
+    </div>
+  <?php endif; ?>
+</section>
+
+
   </div>
 </main>
 
 <?php include 'includes/footer.php'; ?>
+
+<script>
+(function(){
+  const form = document.getElementById('reviewForm');
+  if(!form) return;
+
+  const msg = document.getElementById('reviewMsg');
+  const list = document.getElementById('reviewsList');
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    msg.style.display = "none";
+    msg.className = "reviews-msg";
+
+    const fd = new FormData(form);
+
+    try {
+      const res = await fetch('book_webshop_2XD/ajax/review_save.php', {
+        method: 'POST',
+        body: fd
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if(!res.ok || !data || !data.ok){
+        const err = (data && data.error) ? data.error : "Could not save review.";
+        msg.textContent = err;
+        msg.classList.add("reviews-msg-error");
+        msg.style.display = "block";
+        return;
+      }
+
+      msg.textContent = "Saved!";
+      msg.classList.add("reviews-msg-success");
+      msg.style.display = "block";
+
+      const r = data.review;
+
+      const empty = list.querySelector('.reviews-empty');
+      if(empty) empty.remove();
+
+      let card = list.querySelector(`.review-card[data-user-id="${r.user_id}"]`);
+
+      if(!card){
+        card = document.createElement('article');
+        card.className = "review-card";
+        card.dataset.userId = r.user_id;
+        list.prepend(card);
+      }
+
+      card.innerHTML = `
+        <div class="review-top">
+          <strong>${esc(r.user_name)}</strong>
+          <span class="review-rating">${esc(r.rating)}/5</span>
+        </div>
+        <p class="review-comment">${esc(r.comment).replace(/\n/g,"<br>")}</p>
+        <small class="review-date">${esc(r.created_at)}</small>
+      `;
+
+    } catch (e) {
+      msg.textContent = "Network error.";
+      msg.classList.add("reviews-msg-error");
+      msg.style.display = "block";
+    }
+  });
+})();
+</script>
+
+
 </body>
 </html>

@@ -75,135 +75,90 @@ try {
 <?php include __DIR__ . "/../includes/header.php"; ?>
 
 <main>
-  <div class="container">
-    <div class="admin-order-view">
-    <section class="admin-order-head">
+  <div class="container admin-order-view">
+
+    <section class="admin-head">
       <div>
-        <h2 class="admin-order-title">Order #<?= (int)$orderId ?></h2>
-        <?php if ($order): ?>
-          <p class="admin-order-sub">
-            <?= h($order["user_name"]) ?> · <?= h($order["user_email"]) ?> · <?= h($order["created_at"]) ?>
-          </p>
-        <?php endif; ?>
+        <h2>Order #<?= (int)$order["id"] ?></h2>
+        <p class="admin-sub">
+          <?= h($order["user_email"]) ?> · <?= h($order["created_at"]) ?>
+        </p>
       </div>
-        <div class="admin-order-back">
-      <a class="btn-secondary" href="book_webshop_2XD/admin/orders.php">← Back to orders</a>
-        </div>
+
+      <a class="btn-secondary" href="book_webshop_2XD/admin/orders.php">
+        ← Back to orders
+      </a>
     </section>
 
-    <?php if ($error): ?>
-      <p class="error"><?= h($error) ?></p>
-    <?php endif; ?>
+    <div class="admin-order-layout">
 
-    <?php if ($order): ?>
+      <!-- LEFT -->
+      <div>
 
-      <div class="admin-order-layout">
+        <div class="admin-order-card">
+          <h3>Order summary</h3>
 
-      <aside class="admin-order-summary">
-        <h3>Order summary</h3>
-
-        <div class="admin-order-summary-row">
+          <div class="admin-order-row">
             <span>Status</span>
-            <strong>
-                <span class="admin-orders-status <?= h($order["status"]) ?>">
-                  <?= h($order["status"]) ?>
-                </span>
-            </strong>
-            </div>
-        
-        <div class="admin-order-summary-row">
-            <span>Currency</span>
-            <strong>
-                <?= h($order["currency"] ?? "EUR") ?>
-            </strong>
-        </div>
-    
-        <div class="admin-order-summary-row">
+            <span class="admin-order-status"><?= h($order["status"]) ?></span>
+          </div>
+
+          <div class="admin-order-row">
             <span>Subtotal</span>
-            <strong>
-                <?= number_format((float)$order["subtotal"], 2, ",", ".") ?>
-            </strong>
-        </div>
-    
-        <div class="admin-order-summary-row">
-            <span>Shipping</span>
-            <strong>
-                <?= number_format((float)$order["shipping_cost"], 2, ",", ".") ?>
-            </strong>
-        </div>
-    
-        <div class="admin-order-summary-row">
-            <span>Tax</span>
-            <strong>
-                <?= number_format((float)$order["tax_amount"], 2, ",", ".") ?>
-            </strong>
-        </div>
+            <strong><?= (int)$order["subtotal"] ?> units</strong>
+          </div>
 
-        <div class="admin-order-summary-row admin-order-summary-total">
-            <span><strong>Grand total</strong></span>
-          <strong>
-            <?= number_format((float)$order["grand_total"], 2, ",", ".") ?>
-        </strong>
-        </div>
-        </aside>
-  
-          <section class="admin-order-card">
-         <h3>Items</h3>
-        </section>
-
-        <div class="admin-order-summary-row">
+          <div class="admin-order-row">
             <span>Discount</span>
-            <strong>-
-                <?= number_format((float)$order["discount_total"], 2, ",", ".") ?>
-            </strong>
+            <strong><?= (int)$order["discount_total"] ?> units</strong>
+          </div>
+
+          <div class="admin-order-row admin-order-total-final">
+            <span>Total</span>
+            <strong><?= (int)$order["grand_total"] ?> units</strong>
+          </div>
         </div>
-        <div class="admin-order-summary-row admin-order-summary-total">
-        
-      <?php if (empty($items)): ?>
-        <p>No items found for this order.</p>
-      <?php else: ?>
-        <div class="admin-order-items">
-          <?php foreach ($items as $it): ?>
-            <?php
-              $line = ((float)$it["price"]) * ((int)$it["quantity"]);
-              $unitsEach = (int)round(((float)$it["price"]) * 10);
-              $unitsLine = $unitsEach * (int)$it["quantity"];
-            ?>
-            <article class="admin-order-item-card">
-              <a class="admin-order-item-link" href="book_webshop_2XD/product.php?id=<?= (int)$it["book_id"] ?>">
-                <div class="admin-order-item-img">
-                  <img src="<?= h($it["cover_image"]) ?>" alt="<?= h($it["title"]) ?>">
+
+      </div>
+
+      <!-- RIGHT -->
+      <div>
+
+        <div class="admin-order-card">
+          <h3>Items</h3>
+
+          <div class="admin-order-items">
+
+            <?php foreach ($items as $it): ?>
+              <div class="admin-order-item">
+
+                <img src="<?= h($it["cover_image"]) ?>" alt="">
+
+                <div class="admin-order-item-info">
+                  <h4><?= h($it["title"]) ?></h4>
+                  <p><?= h($it["author_name"]) ?></p>
                 </div>
 
-                      <div class="admin-order-item-info">
-                        <h4><?= h(ucwords($it["title"])) ?></h4>
-                        <p class="admin-order-item-author"><?= h($it["author_name"]) ?></p>
-
-                        <div class="admin-order-item-meta">
-                          <span>Qty: <strong><?= (int)$it["quantity"] ?></strong></span>
-                        </div>
-
-                        <p class="admin-order-item-price">
-                          €<?= number_format((float)$it["price"], 2, ",", ".") ?>
-                          <span>(<?= $unitsEach ?> units)</span>
-                        </p>
-
-                  <div class="admin-order-item-line">
-                    <div class="admin-order-item-line-euro">Line: €<?= number_format($line, 2, ",", ".") ?></div>
-                    <div class="admin-order-item-line-units"><?= (int)$unitsLine ?> units</div>
-                  </div>
+                <div class="admin-order-item-meta">
+                  <strong><?= (int)round($it["price"] * 10) ?> units</strong>
+                  Qty: <?= (int)$it["quantity"] ?>
                 </div>
-              </a>
-            </article>
-          <?php endforeach; ?>
+
+              </div>
+            <?php endforeach; ?>
+
+          </div>
         </div>
-      <?php endif; ?>
-          </section>
+
+      </div>
+
+    </div>
 
   </div>
 </main>
 
-<?php endif; ?>
+
+
 <?php include __DIR__ . "/../includes/footer.php"; ?>
 </body>
 </html>

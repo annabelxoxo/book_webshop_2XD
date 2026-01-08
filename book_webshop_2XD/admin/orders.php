@@ -79,7 +79,6 @@ try {
           <table class="admin-order-table">
             <thead>
               <tr>
-                <th>Order #</th>
                 <th>Customer</th>
                 <th>Status</th>
                 <th>Total</th>
@@ -91,9 +90,6 @@ try {
               <?php foreach ($orders as $o): ?>
                 <tr>
                   <td>
-                    #<?= (int)$o["id"] ?>
-                  </td>
-                  <td>
                     <strong><?= h($o["user_name"]) ?></strong><br>
                     <small style="color:#777;"><?= h($o["user_email"]) ?></small>
                   </td>
@@ -103,8 +99,7 @@ try {
                     </span>
                   </td>
                   <td>
-                    <?= h($o["currency"] ?? "EUR") ?>
-                    <?= number_format((float)$o["grand_total"], 2, ",", ".") ?>
+                      <strong><?= (int)$o["grand_total"] ?> units</strong>
                   </td>
                   <td>
                     <?= h($o["created_at"]) ?>
@@ -126,5 +121,6 @@ try {
 </main>
 
 <?php include __DIR__ . "/../includes/footer.php"; ?>
+
 </body>
 </html>

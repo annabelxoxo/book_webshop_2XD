@@ -21,6 +21,10 @@ $stmt = $pdo->prepare("SELECT id, name, email FROM user WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch();
 
+$stmt = $pdo->prepare("SELECT units FROM user WHERE id = ? LIMIT 1");
+$stmt->execute([$userId]);
+$userUnits = (int)($stmt->fetchColumn() ?? 0);
+
 
 if (!$user) {
   session_destroy();
@@ -108,7 +112,7 @@ try {
             <a href="book_webshop_2XD/profile.php">Profile Info</a>
             <a href="book_webshop_2XD/wishlist.php">Wishlist</a>
             <a href="book_webshop_2XD/classes/cart.php">Shopping Cart</a>
-            <a href="book_webshop_2XD/orders.php">Order History</a>
+            <a href="book_webshop_2XD/classes/order.php">Order History</a>
 
             <form method="post" action="book_webshop_2XD/logout.php">
                 <button type="submit" class="btn-secondary profile-logout-btn">Logout</button>
@@ -135,11 +139,16 @@ try {
             <strong><?php echo htmlspecialchars($user['name']); ?></strong>
         </div>
 
-    <div class="profile-row">
-        <span>Email</span>
-        <strong><?php echo htmlspecialchars($user['email']); ?></strong>
-    </div>
+        <div class="profile-row">
+            <span>Email</span>
+            <strong><?php echo htmlspecialchars($user['email']); ?></strong>
+        </div>
 
+        <div class="profile-row">
+            <span>units balance</span>
+            <strong><?= (int)$userUnits ?> units</strong>
+        </div>
+</div>
     <a href="#" class="profile-edit">Edit Profile</a>
     </div>
       <div class="profile-box">
@@ -166,7 +175,7 @@ try {
             To change your password, please click the button below.
         </p>
 
-        <a href="#" class="btn-primary">Change Password</a>
+        <a href="book_webshop_2XD/change_password.php" class="btn-primary">Change Password</a>
     </div>
 
   <div class="profile-box">

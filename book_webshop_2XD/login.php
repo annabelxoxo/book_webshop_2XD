@@ -95,7 +95,10 @@ exit;
 
           <button type="submit" class="auth-btn">Login</button>
         </form>
-
+        <p class="auth-bottom">
+          <a href="book_webshop_2XD/forgot_password.php">Forgot password?</a>
+        </p>
+        
         <p class="auth-bottom">
           Don't have an account? <a href="book_webshop_2XD/register.php">Register here</a>.
         </p>

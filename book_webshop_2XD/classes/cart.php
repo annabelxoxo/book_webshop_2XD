@@ -232,9 +232,9 @@ foreach ($items as $it) {
 
           <p class="cart-rate">1€ = 10 units</p>
 
-          <button class="btn-primary cart-checkout" type="button" disabled>
-            Checkout (coming soon)
-          </button>
+          <a class="btn-primary cart-checkout" href="book_webshop_2XD/checkout.php">
+            Checkout
+          </a>
 
           <a class="btn-secondary cart-back" href="catalog.php">← Continue shopping</a>
         </aside>

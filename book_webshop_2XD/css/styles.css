@@ -1596,16 +1596,31 @@ button{
   font-size: 12px;
 }
 
-.cart-checkout{
-  width:100%;
+.cart-summary a.cart-checkout{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   height: 44px;
   border-radius: 12px;
-  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+
+  background: var(--brown);
+  color: #fff;
+
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  border: 1px solid var(--brown);
+
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 
-.cart-checkout:disabled{
-  opacity: .6;
-  cursor: not-allowed;
+.cart-summary a.cart-checkout:hover{
+  background: #5a3e2a;
+  border-color: #5a3e2a;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.15);
 }
 
 .cart-back{
@@ -1613,71 +1628,436 @@ button{
   justify-content:center;
 }
 
-/* =========================================
-   Footer
-========================================= */
-.main-footer{
-  background-color: var(--brown);
-  color: var(--cream);
-  margin-top: auto;
-}
+/* =========================
+   Checkout page
+========================= */
 
-.footer-container{
-  display: flex;
+.checkout-head{
+  display:flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 40px;
-  padding: 48px 0;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 18px;
 }
 
-.footer-left p{
-  margin: 6px 0;
+.checkout-head h2{
+  font-size: 28px;
+  color: var(--brown);
+  margin-bottom: 4px;
+}
+
+.checkout-sub{
+  color:#666;
   font-size: 14px;
 }
 
-.footer-left a{
-  color: var(--cream);
-  text-decoration: none;
+.checkout-layout{
+  display:grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items:start;
+  margin-bottom: 90px;
 }
 
-.footer-left a:hover{
-  text-decoration: underline;
+.checkout-items .cart-card{
+  margin-bottom: 18px;
 }
 
-.footer-right{
-  max-width: 420px;
+.checkout-items .cart-card-link{
+  grid-template-columns: 120px 1fr;
 }
 
-.footer-about{
+.checkout-items .cart-img{
+  height: 160px;
+}
+
+.checkout-summary{
+  position: sticky;
+  top: 92px;
+  background:#fff;
+  border: 1px solid #eee3da;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+  padding: 16px;
+}
+
+.checkout-summary h3{
+  color: var(--brown);
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.checkout-summary-row{
+  display:flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee3da;
+  color:#555;
+}
+
+.checkout-summary-row:last-child{
+  border-bottom: none;
+}
+
+.checkout-summary strong{
+  color: var(--dark);
+}
+
+.checkout-units-note{
+  margin: 10px 0 14px;
+  color:#777;
+  font-size: 12px;
+}
+
+.checkout-summary label{
+  display:block;
+  font-weight: 700;
+  color: var(--brown);
+  margin: 14px 0 8px;
+  font-size: 13px;
+}
+
+.checkout-summary select,
+.checkout-summary input{
+  width:100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #d7cfc7;
+  padding: 0 12px;
+  background:#fff;
+  outline: none;
+}
+
+.checkout-pay{
+  width:100%;
+  height: 44px;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+/* =========================
+   Reviews
+========================= */
+.reviews-shell{
+  margin: 40px 0 90px;
+}
+
+.reviews-head{
+  display:flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.reviews-head h2{
+  font-size: 24px;
+  color: var(--brown);
+  margin-bottom: 4px;
+}
+
+.reviews-head p{ color:#666; }
+
+.reviews-list{
+  display:grid;
+  gap: 12px;
+}
+
+.review-card{
+  background:#fff;
+  border: 1px solid #eee3da;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  padding: 14px 16px;
+}
+
+.review-top{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.review-top strong{ color: var(--brown); }
+
+.review-rating{
+  font-weight: 800;
+  color: var(--dark);
+  background: rgba(74,63,53,0.06);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.review-comment{
+  color:#444;
+  line-height: 1.45;
+}
+
+.review-date{
+  display:block;
+  margin-top: 10px;
+  color:#777;
+  font-size: 12px;
+}
+
+.reviews-empty{
+  color:#777;
+  padding: 10px 0;
+}
+
+.reviews-note{
+  margin-top: 14px;
+  color:#666;
   font-size: 14px;
-  line-height: 1.5;
+}
+
+.review-form-card{
+  margin-top: 16px;
+  background:#fff;
+  border: 1px solid #eee3da;
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+  padding: 16px;
+  max-width: 620px;
+}
+
+.review-form-card h3{
+  color: var(--brown);
+  margin-bottom: 10px;
+}
+
+#reviewForm label{
+  display:block;
+  margin: 10px 0 6px;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+#reviewForm select,
+#reviewForm textarea{
+  width: 100%;
+  border: 1px solid #d7cfc7;
+  border-radius: 12px;
+  padding: 10px 12px;
+  outline: none;
+  background: #fff;
+}
+
+/* =========================
+   Admin order view
+========================= */
+
+.admin-order-view{
+  max-width: 900px;
+  margin: 0 auto 80px;
+}
+
+/* Order summary card */
+.admin-order-card{
+  background:#fff;
+  border: 1px solid #eee3da;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+}
+
+.admin-order-card h3{
+  font-size: 20px;
+  color: var(--brown);
   margin-bottom: 14px;
 }
 
-.socials{
-  display: flex;
+/* Rows */
+.admin-order-row{
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee3da;
+  font-size: 14px;
+  color:#555;
+}
+
+.admin-order-row:last-child{
+  border-bottom: none;
+}
+
+.admin-order-row strong{
+  color: var(--dark);
+  font-weight: 700;
+}
+
+/* Status badge */
+.admin-order-status{
+  display:inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(74,63,53,.12);
+  color: var(--brown);
+  text-transform: uppercase;
+}
+
+/* =========================
+   Order items
+========================= */
+
+.admin-order-items{
+  display:grid;
   gap: 14px;
 }
 
-.socials a{
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background: rgba(248,231,210,0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
+.admin-order-item{
+  display:grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 14px;
+  align-items:center;
+
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #eee3da;
+  background:#fff;
+  box-shadow: 0 6px 14px rgba(0,0,0,.06);
 }
 
-.socials a:hover{
-  background: rgba(248,231,210,0.25);
+.admin-order-item img{
+  width:80px;
+  height:110px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--bg);
 }
 
-.socials img{
-  width: 18px;
-  height: 18px;
+.admin-order-item-info h4{
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: var(--brown);
 }
+
+.admin-order-item-info p{
+  margin: 0;
+  font-size: 13px;
+  color:#777;
+}
+
+.admin-order-item-meta{
+  text-align:right;
+  font-size: 13px;
+  color:#555;
+}
+
+.admin-order-item-meta strong{
+  display:block;
+  font-size: 14px;
+  color: var(--dark);
+}
+
+/* =========================
+   Order totals
+========================= */
+
+.admin-order-totals{
+  margin-top: 20px;
+  border-top: 1px solid #eee3da;
+  padding-top: 16px;
+}
+
+.admin-order-total-row{
+  display:flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color:#555;
+}
+
+.admin-order-total-row strong{
+  color: var(--dark);
+  font-weight: 800;
+}
+
+.admin-order-total-final{
+  font-size: 16px;
+  padding-top: 12px;
+}
+
+.admin-order-back{
+  margin-top: 24px;
+}
+
+/* =========================
+   Admin orders list
+========================= */
+
+.admin-orders-card{
+  width: 100%;
+}
+
+.admin-orders-table{
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-orders-table th,
+.admin-orders-table td{
+  padding: 14px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-orders-table thead th{
+  color: var(--brown);
+  font-weight: 800;
+  border-bottom: 1px solid #eee3da;
+}
+
+.admin-orders-table tbody tr{
+  border-bottom: 1px solid #f0e6dd;
+}
+
+.admin-orders-table tbody tr:last-child{
+  border-bottom: none;
+}
+
+
+.admin-orders-table th:nth-child(1),
+.admin-orders-table td:nth-child(1){
+  width: 32%;
+}
+
+.admin-orders-table th:nth-child(2),
+.admin-orders-table td:nth-child(2){
+  width: 12%; 
+}
+
+.admin-orders-table th:nth-child(3),
+.admin-orders-table td:nth-child(3){
+  width: 16%;
+
+.admin-orders-table th:nth-child(4),
+.admin-orders-table td:nth-child(4){
+  width: 20%;
+}
+
+.admin-orders-table th:nth-child(5),
+.admin-orders-table td:nth-child(5){
+  width: 20%; 
+}
+
+.admin-orders-table td small{
+  display:block;
+  color:#777;
+  margin-top: 4px;
+}
+
+.admin-orders-actions .btn-secondary{
+  height: 38px;
+  padding: 0 16px;
+}
+
 
 /* =========================
    Admin dashboard
@@ -2530,6 +2910,72 @@ button{
   font-size: 14px;
 }
 
+/* =========================================
+   Footer
+========================================= */
+.main-footer{
+  background-color: var(--brown);
+  color: var(--cream);
+  margin-top: auto;
+}
+
+.footer-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 48px 0;
+}
+
+.footer-left p{
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.footer-left a{
+  color: var(--cream);
+  text-decoration: none;
+}
+
+.footer-left a:hover{
+  text-decoration: underline;
+}
+
+.footer-right{
+  max-width: 420px;
+}
+
+.footer-about{
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.socials{
+  display: flex;
+  gap: 14px;
+}
+
+.socials a{
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(248,231,210,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+}
+
+.socials a:hover{
+  background: rgba(248,231,210,0.25);
+}
+
+.socials img{
+  width: 18px;
+  height: 18px;
+}
+
 
 /* =========================================
    Responsive
@@ -2575,3 +3021,4 @@ button{
   }
 }
 
+}
